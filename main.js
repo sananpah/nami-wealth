@@ -1,6 +1,6 @@
-/* Nami Terminal Core Logic */
+/* main.js - Module Version */
+
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
-let allocChart, progressChart;
 
 const emojiMap = {
     "Digital Gold": "🌟",
@@ -22,11 +22,12 @@ const emojiMap = {
 };
 
 // Start Fetching on Load
-window.onload = () => {
+document.addEventListener('DOMContentLoaded', () => {
     fetchNamiData();
-};
+});
 
 async function fetchNamiData() {
+    const statusEl = document.getElementById('status-text');
     try {
         const response = await fetch(SHEET_URL);
         const fullData = await response.json();
@@ -50,10 +51,13 @@ async function fetchNamiData() {
         renderDonut(categorySums);
         renderProgress(snapshotData, currentTotal);
         calculateGrowth(snapshotData, currentTotal);
-        document.getElementById('status-text').innerText = "System Live ⚡";
+        
+        statusEl.innerText = "System Live ⚡";
+        statusEl.style.backgroundColor = "#22c55e"; // Success Green
     } catch (error) { 
-        console.error("Fetch Error:", error); 
-        document.getElementById('status-text').innerText = "Sync Error ❌";
+        console.error(error); 
+        statusEl.innerText = "Sync Failed ❌";
+        statusEl.style.backgroundColor = "#ef4444"; // Error Red
     }
 }
 
@@ -68,12 +72,11 @@ function renderCards(data) {
         
         if (sub === "Digital Gold") colorClass = "c-gold";
 
-        // Logic to make Digital Gold interactive
         const clickAction = (sub === "Digital Gold") ? `onclick="openGoldDrilldown()"` : "";
-        const cursorStyle = (sub === "Digital Gold") ? "cursor-pointer active:scale-95 hover:brightness-110" : "";
+        const cursor = (sub === "Digital Gold") ? "cursor-pointer active:scale-95" : "";
 
         container.innerHTML += `
-            <div ${clickAction} class="funky-card p-4 md:p-6 ${colorClass} ${cursorStyle} transition-all">
+            <div ${clickAction} class="funky-card p-4 md:p-6 ${colorClass} ${cursor} transition-all">
                 <span class="card-emoji">${emojiMap[sub] || "💰"}</span>
                 <div class="asset-label">${cat}</div>
                 <br>
@@ -83,37 +86,32 @@ function renderCards(data) {
     });
 }
 
-// --- DRILLDOWN COMPONENTS ---
-
-function openGoldDrilldown() {
+// Attach these to window so the HTML onclicks work
+window.openGoldDrilldown = function() {
     const drawer = document.getElementById('detail-drawer');
     const content = document.getElementById('drawer-content');
     
-    // Using Data from image_8e90c9.png
     const gold = {
         totalInv: 3851.07,
         totalVal: 4858.97,
         platforms: [
-            { name: "Ultra", inv: 500, val: 820.25, gain: 64.05, theme: "border-yellow-500" },
-            { name: "Gullak", inv: 3351.07, val: 4038.72, gain: 20.52, theme: "border-orange-500" }
+            { name: "Ultra", inv: 500, val: 820.25, gain: 64.05, border: "border-yellow-500" },
+            { name: "Gullak", inv: 3351.07, val: 4038.72, gain: 20.52, border: "border-orange-500" }
         ]
     };
 
     content.innerHTML = `
         <div class="flex justify-between items-center mb-8">
             <h2 class="text-3xl font-black italic uppercase">Digital Gold Vault</h2>
-            <button onclick="closeDrawer()" class="bg-black text-white px-6 py-2 rounded-full font-black uppercase text-xs">Close</button>
+            <button onclick="closeDrawer()" class="bg-black text-white px-6 py-2 rounded-full font-black uppercase text-xs">Back</button>
         </div>
-
         <div class="grid grid-cols-2 gap-4 mb-8">
             <div class="funky-card p-4 bg-white"><p class="text-[10px] font-black text-gray-400 uppercase">Invested</p><p class="text-xl font-black stat-val">₹${Math.round(gold.totalInv).toLocaleString()}</p></div>
             <div class="funky-card p-4 c-gold"><p class="text-[10px] font-black uppercase">Net Worth</p><p class="text-xl font-black stat-val">₹${Math.round(gold.totalVal).toLocaleString()}</p></div>
         </div>
-
         <div class="space-y-4">
-            <p class="text-xs font-black uppercase text-gray-500 ml-2">Platform Split</p>
             ${gold.platforms.map(p => `
-                <div class="funky-card p-6 flex justify-between items-center bg-white border-l-[12px] ${p.theme}">
+                <div class="funky-card p-6 flex justify-between items-center bg-white border-l-[12px] ${p.border}">
                     <div>
                         <h3 class="font-black text-xl italic uppercase">${p.name}</h3>
                         <p class="text-[10px] font-bold text-gray-400">COST: ₹${p.inv.toLocaleString()}</p>
@@ -129,16 +127,16 @@ function openGoldDrilldown() {
 
     drawer.classList.remove('opacity-0', 'pointer-events-none');
     content.style.transform = "translateY(0)";
-}
+};
 
-function closeDrawer() {
+window.closeDrawer = function() {
     const drawer = document.getElementById('detail-drawer');
     const content = document.getElementById('drawer-content');
     drawer.classList.add('opacity-0', 'pointer-events-none');
     content.style.transform = "translateY(100%)";
-}
+};
 
-// --- HELPER FUNCTIONS ---
+// --- CHARTS & HELPERS ---
 
 function calculateGrowth(snapshotData, currentTotal) {
     if (!snapshotData || snapshotData.length === 0) return;
@@ -157,8 +155,7 @@ function calculateGrowth(snapshotData, currentTotal) {
 
 function renderDonut(catData) {
     const ctx = document.getElementById('categoryChart').getContext('2d');
-    if (allocChart) allocChart.destroy();
-    allocChart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'doughnut',
         data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#FF00FF', '#00FFFF', '#FFD700', '#39FF14', '#FF5F1F', '#8A2BE2', '#FF004D'], borderColor: '#000', borderWidth: 4 }] },
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { padding: 10, font: { weight: 'bold', family: 'Outfit', size: 10 }, color: '#000' } } } }
@@ -181,8 +178,7 @@ function renderProgress(snapshotData, currentTotal) {
     let values = Object.values(grouped);
     labels.push("Live");
     values.push(currentTotal);
-    if (progressChart) progressChart.destroy();
-    progressChart = new Chart(ctx, {
+    new Chart(ctx, {
         type: 'line',
         data: { labels: labels, datasets: [{ data: values, borderColor: '#000', borderWidth: 4, pointRadius: 5, pointBackgroundColor: '#FF00FF', tension: 0.3, fill: false }] },
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { font: { size: 10, family: 'Space Mono' }, callback: v => '$' + Math.round(v/1000) + 'k' } } }, plugins: { legend: { display: false } } }
