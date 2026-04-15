@@ -3,10 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nami Wealth Terminal v10.0</title>
+    <title>Nami Wealth Terminal v10.1</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <link rel="stylesheet" href="styles.css">
 </head>
 <body class="p-4 md:p-10 max-w-[1750px] mx-auto">
 
@@ -44,10 +44,9 @@
     </div>
 
     <div id="detail-drawer" class="fixed inset-0 z-[10000] bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
-        <div id="drawer-content" class="absolute bottom-0 left-0 right-0 bg-slate-100 rounded-t-[40px] p-8 translate-y-full transition-all duration-500 border-t-8 border-black max-h-[90vh] overflow-y-auto">
-            </div>
+        <div id="drawer-content" class="absolute bottom-0 left-0 right-0 bg-slate-100 rounded-t-[40px] p-8 translate-y-full transition-all duration-500 border-t-8 border-black max-h-[90vh] overflow-y-auto"></div>
     </div>
 
-    <script src="main.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
