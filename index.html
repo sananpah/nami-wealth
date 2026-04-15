@@ -1,21 +1,53 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <link rel="stylesheet" href="styles.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nami Wealth Terminal v10.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link rel="stylesheet" href="styles.css">
 </head>
-<body class="p-4 md:p-10 mx-auto max-w-[1750px]">
-    <div id="lock-screen">...</div>
+<body class="p-4 md:p-10 max-w-[1750px] mx-auto">
 
-    <div id="main-content" style="display: none;">
-        <div id="matrix-container" class="grid grid-cols-2 lg:grid-cols-4 gap-6"></div>
+    <div id="main-content">
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
+            <div class="max-w-xl">
+                <h1 class="text-3xl md:text-5xl lg:text-6xl font-black italic nami-header uppercase">Nami Wealth Terminal</h1>
+                <p id="status-text" class="bg-black text-white inline-block px-3 py-1 text-[10px] font-black uppercase mt-2">Initialising 📡</p>
+            </div>
+            
+            <div class="funky-card bg-white p-6 md:p-10 text-center flex flex-col items-center justify-center w-full lg:w-auto min-w-full lg:min-w-[450px]">
+                <span class="text-[10px] md:text-xs font-black uppercase text-gray-400 tracking-[0.2em] mb-3">Consolidated Net Worth 🌍</span>
+                <div class="flex flex-col md:flex-row items-center gap-2 md:gap-6">
+                    <div id="total-networth" class="text-4xl md:text-6xl font-black stat-val">$0</div>
+                    <div id="growth-badge" class="mt-1 md:mt-0"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="mb-8">
+            <div class="funky-card bg-white p-4 md:p-8 w-full">
+                <h2 class="text-center font-black uppercase mb-4 italic text-lg md:text-2xl text-pink-600">Wealth Progression 📈</h2>
+                <div class="h-[250px] md:h-[350px]"><canvas id="progressChart"></canvas></div>
+            </div>
+        </div>
+        
+        <div class="mb-10 flex justify-center">
+            <div class="funky-card bg-white p-4 md:p-6 w-full max-w-2xl h-[400px] md:h-[480px]">
+                <h2 class="text-center font-black uppercase mb-4 italic text-base md:text-xl">Asset Distribution 📊</h2>
+                <canvas id="categoryChart"></canvas>
+            </div>
+        </div>
+        
+        <div id="matrix-container" class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-16"></div>
     </div>
 
-    <div id="detail-drawer" class="opacity-0 pointer-events-none transition-all duration-300">
-        <div id="drawer-content" class="drawer-content"></div>
+    <div id="detail-drawer" class="fixed inset-0 z-[10000] bg-black/40 backdrop-blur-sm opacity-0 pointer-events-none transition-all duration-300">
+        <div id="drawer-content" class="absolute bottom-0 left-0 right-0 bg-slate-100 rounded-t-[40px] p-8 translate-y-full transition-all duration-500 border-t-8 border-black max-h-[90vh] overflow-y-auto">
+            </div>
     </div>
 
-    <script type="module" src="main.js"></script>
+    <script src="main.js"></script>
 </body>
 </html>
