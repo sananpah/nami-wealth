@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nami Wealth Terminal v9.9</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Mono:wght@700&display=swap');
+        body { 
+            background: linear-gradient(125deg, #FF00E6 0%, #FFB800 25%, #00FFF0 50%, #4DFF00 75%, #FF004D 100%);
+            background-attachment: fixed;
+            color: #000; font-family: 'Outfit', sans-serif; min-height: 100vh;
+        }
+        #lock-screen {
+            position: fixed; inset: 0; background: #000; z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .pin-input {
+            background: transparent; border-bottom: 4px solid #FF00FF; color: #fff;
+            font-family: 'Space Mono'; font-size: 3rem; text-align: center; width: 160px; outline: none;
+        }
+        .funky-card { 
+            background: rgba(255, 255, 255, 0.95); border: 4px solid #000; border-radius: 24px; 
+            box-shadow: 6px 6px 0px #000; position: relative; transition: all 0.2s; overflow: hidden;
+        }
+        @media (min-width: 768px) {
+            .funky-card { border: 5px solid #000; border-radius: 30px; box-shadow: 10px 10px 0px #000; }
+        }
+        .stat-val { font-family: 'Space Mono', monospace; font-weight: 900; letter-spacing: -1px; line-height: 1.2; }
+        .nami-header { -webkit-text-stroke: 1.5px #000; text-shadow: 3px 3px 0px #fff; letter-spacing: 0.05em; word-spacing: 0.2em; }
+        @media (min-width: 768px) { .nami-header { -webkit-text-stroke: 2px #000; text-shadow: 4px 4px 0px #fff; } }
+        
+        .card-emoji { position: absolute; top: 8px; right: 10px; font-size: 1.6rem; filter: drop-shadow(2px 2px 0px rgba(0,0,0,0.1)); }
+        @media (min-width: 768px) { .card-emoji { font-size: 2.2rem; top: 10px; right: 15px; } }
+
+        .up-badge { background: #39FF14; color: #000; padding: 2px 10px; border-radius: 99px; font-weight: 900; font-size: 11px; border: 2px solid #000; display: inline-block; }
+        .down-badge { background: #FF3131; color: #fff; padding: 2px 10px; border-radius: 99px; font-weight: 900; font-size: 11px; border: 2px solid #000; display: inline-block; }
+
+        .c-gold { background: #FFD700 !important; color: #000; }               
+        .c-01 { background: #FF00FF !important; color: #fff; } .c-02 { background: #FF3131 !important; color: #fff; } 
+        .c-03 { background: #FF5F1F !important; color: #fff; } .c-05 { background: #CCFF00 !important; }               
+        .c-06 { background: #39FF14 !important; } .c-07 { background: #00FF7F !important; }               
+        .c-08 { background: #00FFFF !important; } .c-09 { background: #00F5FF !important; }               
+        .c-10 { background: #007BFF !important; color: #fff; } .c-11 { background: #8A2BE2 !important; color: #fff; } 
+        .asset-label { font-size: 8px; font-weight: 900; text-transform: uppercase; background: #000; color: #fff; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 2px; }
+    </style>
+</head>
+<body class="p-4 md:p-10 max-w-[1750px] mx-auto">
+
+    <div id="lock-screen">
+        <h1 class="text-white font-black text-xl md:text-2xl uppercase tracking-widest mb-8">Nami Terminal Locked</h1>
+        <input type="password" id="pin-field" class="pin-input" maxlength="4" placeholder="••••">
+        <button onclick="checkPin()" class="mt-10 bg-white text-black font-black px-10 py-3 uppercase rounded-full transition-all">Unlock</button>
+        <p id="lock-error" class="mt-4 text-red-500 font-bold uppercase text-xs"></p>
+    </div>
+
+    <div id="main-content" style="display: none;">
+        <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
+            <div class="max-w-xl">
+                <h1 class="text-3xl md:text-5xl lg:text-6xl font-black italic nami-header uppercase">Nami Wealth Terminal</h1>
+                <p id="status-text" class="bg-black text-white inline-block px-3 py-1 text-[10px] font-black uppercase mt-2">Live 📡</p>
+            </div>
+            
+            <div class="funky-card bg-white p-6 md:p-10 text-center flex flex-col items-center justify-center w-full lg:w-auto min-w-full lg:min-w-[450px]">
+                <span class="text-[10px] md:text-xs font-black uppercase text-gray-400 tracking-[0.2em] mb-3">Consolidated Net Worth 🌍</span>
+                <div class="flex flex-col md:flex-row items-center gap-2 md:gap-6">
+                    <div id="total-networth" class="text-4xl md:text-6xl font-black stat-val">$0</div>
+                    <div id="growth-badge" class="mt-1 md:mt-0"></div>
+                </div>
+            </div>
+        </header>
+
+        <div class="mb-8"><div class="funky-card bg-white p-4 md:p-8 w-full"><h2 class="text-center font-black uppercase mb-4 italic text-lg md:text-2xl text-pink-600">Wealth Progression 📈</h2><div class="h-[250px] md:h-[350px]"><canvas id="progressChart"></canvas></div></div></div>
+        <div class="mb-10 flex justify-center"><div class="funky-card bg-white p-4 md:p-6 w-full max-w-2xl h-[400px] md:h-[480px]"><h2 class="text-center font-black uppercase mb-4 italic text-base md:text-xl">Asset Distribution 📊</h2><canvas id="categoryChart"></canvas></div></div>
+        
+        <div id="matrix-container" class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-6 mb-16"></div>
+    </div>
+
+    <script>
+        const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
+        const MY_PIN = "1977"; 
+        let allocChart, progressChart;
+
+        function checkPin() {
+            if (document.getElementById('pin-field').value === MY_PIN) {
+                document.getElementById('lock-screen').style.display = 'none';
+                document.getElementById('main-content').style.display = 'block';
+                fetchNamiData();
+            } else {
+                document.getElementById('lock-error').innerText = "Incorrect PIN Access Denied";
+                document.getElementById('pin-field').value = '';
+            }
+        }
+        document.getElementById('pin-field').addEventListener("keyup", (e) => { if (e.key === "Enter") checkPin(); });
+
+        const emojiMap = {
+            "Digital Gold": "🌟",
+            "Property(Fractional + Debt)": "🏢",
+            "Invoice Discounting + Asset Leasing": "📄💸",
+            "P2P Lending": "🤝💰",
+            "Crypto": "🪙",
+            "ESOW": "👔",
+            "Unit Trust": "🏦📊" ,
+            "ETF": "🧺",
+            "Stocks + Mutual Funds": "📈",
+            "Bonds": "📜💵",
+            "Cash": "💰",
+            "Robo Portfolio": "🤖",
+            "Savings & Investment Linked": "💼",
+            "Investments": "🧓📈",
+            "Non-Investments": "🧓💰",
+            "SRS Investments": "🛡️"
+        };
+
+        function formatShortDate(dateStr) {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) return dateStr;
+            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            return `${months[date.getMonth()]} ${date.getFullYear().toString().substr(-2)}`;
+        }
+
+        async function fetchNamiData() {
+            try {
+                const response = await fetch(SHEET_URL);
+                const fullData = await response.json();
+                const dashboardData = fullData.dashboard || [];
+                const snapshotData = fullData.snapshot || [];
+                let currentTotal = 0;
+                let categorySums = {};
+
+                dashboardData.forEach(item => {
+                    const amt = parseFloat(String(item.amount).replace(/[$,%]/g, '')) || 0;
+                    if (amt > 0) {
+                        currentTotal += amt;
+                        const cat = String(item.Category || item.category || "Misc").trim();
+                        if (cat && cat !== "undefined") categorySums[cat] = (categorySums[cat] || 0) + amt;
+                    }
+                });
+
+                document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
+                renderCards(dashboardData);
+                renderDonut(categorySums);
+                renderProgress(snapshotData, currentTotal);
+                calculateGrowth(snapshotData, currentTotal);
+                document.getElementById('status-text').innerText = "System Live ⚡";
+            } catch (error) { console.error(error); }
+        }
+
+        function calculateGrowth(snapshotData, currentTotal) {
+            if (!snapshotData || snapshotData.length === 0) return;
+            const grouped = snapshotData.reduce((acc, curr) => {
+                const dateKey = String(curr.Date || curr.date).trim();
+                const amt = parseFloat(String(curr.Amount || curr.amount).replace(/[$,%]/g, '')) || 0;
+                if (dateKey && dateKey !== "undefined") acc[dateKey] = (acc[dateKey] || 0) + amt;
+                return acc;
+            }, {});
+            const dates = Object.keys(grouped);
+            const lastTotal = grouped[dates[dates.length - 1]];
+            const percent = (((currentTotal - lastTotal) / lastTotal) * 100).toFixed(1);
+            const badge = document.getElementById('growth-badge');
+            badge.innerHTML = currentTotal >= lastTotal ? `<span class="up-badge">▲ +${percent}%</span>` : `<span class="down-badge">▼ ${percent}%</span>`;
+        }
+
+        function renderCards(data) {
+            const container = document.getElementById('matrix-container');
+            container.innerHTML = ''; 
+            data.forEach((item, index) => {
+                const sub = String(item['sub-category'] || "Asset").trim();
+                const amt = parseFloat(String(item.amount).replace(/[$,%]/g, '')) || 0;
+                const cat = String(item.Category || "Misc").trim();
+                let colorClass = "c-" + (((index % 11) + 1) < 10 ? '0' + ((index % 11) + 1) : ((index % 11) + 1));
+                if (sub === "Digital Gold") colorClass = "c-gold";
+                container.innerHTML += `<div class="funky-card p-4 md:p-6 ${colorClass}"><span class="card-emoji">${emojiMap[sub] || "💰"}</span><div class="asset-label">${cat}</div><br><div class="font-black text-[10px] md:text-xs uppercase opacity-80">${sub}</div><div class="text-xl md:text-4xl stat-val mt-2 md:mt-4">$${Math.round(amt).toLocaleString()}</div></div>`;
+            });
+        }
+
+        function renderDonut(catData) {
+            const ctx = document.getElementById('categoryChart').getContext('2d');
+            if (allocChart) allocChart.destroy();
+            allocChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#FF00FF', '#00FFFF', '#FFD700', '#39FF14', '#FF5F1F', '#8A2BE2', '#FF004D'], borderColor: '#000', borderWidth: 4 }] },
+                options: { responsive: true, maintainAspectRatio: false, layout: { padding: { bottom: 20 } }, plugins: { legend: { position: 'bottom', labels: { padding: 10, font: { weight: 'bold', family: 'Outfit', size: window.innerWidth < 768 ? 9 : 12 }, color: '#000' } } } }
+            });
+        }
+
+        function renderProgress(snapshotData, currentTotal) {
+            const ctx = document.getElementById('progressChart').getContext('2d');
+            const grouped = snapshotData.reduce((acc, curr) => {
+                const rawDate = String(curr.Date || curr.date || "").trim();
+                const amt = parseFloat(String(curr.Amount || curr.amount || 0).replace(/[$,%]/g, '')) || 0;
+                if (rawDate && rawDate !== "undefined") {
+                    const cleanDate = formatShortDate(rawDate);
+                    acc[cleanDate] = (acc[cleanDate] || 0) + amt;
+                }
+                return acc;
+            }, {});
+            let labels = Object.keys(grouped);
+            let values = Object.values(grouped);
+            labels.push("Live");
+            values.push(currentTotal);
+            if (window.innerWidth < 768 && labels.length > 6) {
+                labels = labels.slice(-6);
+                values = values.slice(-6);
+            }
+            if (progressChart) progressChart.destroy();
+            progressChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: labels, datasets: [{ data: values, borderColor: '#000', borderWidth: 4, pointRadius: 5, pointBackgroundColor: '#FF00FF', tension: 0.3, fill: false }] },
+                options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { font: { size: 10, family: 'Space Mono' }, callback: v => '$' + Math.round(v/1000) + 'k' } }, x: { ticks: { font: { size: 10, family: 'Outfit', weight: 'bold' } } } }, plugins: { legend: { display: false } } }
+            });
+        }
+    </script>
+</body>
+</html>
