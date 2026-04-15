@@ -1,0 +1,44 @@
+/* styles.css */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Mono:wght@700&display=swap');
+
+body { 
+    background: linear-gradient(125deg, #FF00E6 0%, #FFB800 25%, #00FFF0 50%, #4DFF00 75%, #FF004D 100%);
+    background-attachment: fixed;
+    color: #000; font-family: 'Outfit', sans-serif; min-height: 100vh;
+}
+
+#lock-screen {
+    position: fixed; inset: 0; background: #000; z-index: 9999;
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+}
+
+.pin-input {
+    background: transparent; border-bottom: 4px solid #FF00FF; color: #fff;
+    font-family: 'Space Mono'; font-size: 3rem; text-align: center; width: 160px; outline: none;
+}
+
+.funky-card { 
+    background: rgba(255, 255, 255, 0.95); border: 4px solid #000; border-radius: 24px; 
+    box-shadow: 6px 6px 0px #000; position: relative; transition: all 0.2s; overflow: hidden;
+}
+
+.stat-val { font-family: 'Space Mono', monospace; font-weight: 900; letter-spacing: -1px; line-height: 1.2; }
+.nami-header { -webkit-text-stroke: 1.5px #000; text-shadow: 3px 3px 0px #fff; letter-spacing: 0.05em; }
+
+/* Category Colors */
+.c-gold { background: #FFD700 !important; }
+.c-01 { background: #FF00FF !important; color: #fff; }
+/* ... add other c-XX classes here ... */
+
+.up-badge { background: #39FF14; color: #000; padding: 2px 10px; border-radius: 99px; font-weight: 900; font-size: 11px; border: 2px solid #000; }
+
+/* Drilldown Drawer */
+#detail-drawer {
+    position: fixed; inset: 0; z-index: 10000; background: rgba(0,0,0,0.6);
+    backdrop-filter: blur(4px); transition: all 0.3s;
+}
+.drawer-content {
+    position: absolute; bottom: 0; left: 0; right: 0; background: #f8fafc;
+    border-top: 5px solid #000; border-radius: 40px 40px 0 0; padding: 2rem;
+    transform: translateY(100%); transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
