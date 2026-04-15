@@ -1,4 +1,4 @@
-/* main.js - Module Version */
+/* main.js - Standard Version */
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
 
@@ -21,16 +21,18 @@ const emojiMap = {
     "Non-Investments": "🧓💰"
 };
 
-// Start Fetching on Load
-document.addEventListener('DOMContentLoaded', () => {
+// Auto-run on load
+window.onload = function() {
+    console.log("Terminal Booting...");
     fetchNamiData();
-});
+};
 
 async function fetchNamiData() {
     const statusEl = document.getElementById('status-text');
     try {
         const response = await fetch(SHEET_URL);
         const fullData = await response.json();
+        
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
         
@@ -48,16 +50,20 @@ async function fetchNamiData() {
 
         document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
         renderCards(dashboardData);
-        renderDonut(categorySums);
-        renderProgress(snapshotData, currentTotal);
-        calculateGrowth(snapshotData, currentTotal);
         
+        if (typeof Chart !== 'undefined') {
+            renderDonut(categorySums);
+            renderProgress(snapshotData, currentTotal);
+        }
+        
+        calculateGrowth(snapshotData, currentTotal);
         statusEl.innerText = "System Live ⚡";
-        statusEl.style.backgroundColor = "#22c55e"; // Success Green
+        statusEl.style.backgroundColor = "#22c55e"; 
+
     } catch (error) { 
-        console.error(error); 
+        console.error("Fetch Error:", error); 
         statusEl.innerText = "Sync Failed ❌";
-        statusEl.style.backgroundColor = "#ef4444"; // Error Red
+        statusEl.style.backgroundColor = "#ef4444";
     }
 }
 
@@ -86,11 +92,11 @@ function renderCards(data) {
     });
 }
 
-// Attach these to window so the HTML onclicks work
-window.openGoldDrilldown = function() {
+function openGoldDrilldown() {
     const drawer = document.getElementById('detail-drawer');
     const content = document.getElementById('drawer-content');
     
+    // Hardcoded data from image_8e90c9.png
     const gold = {
         totalInv: 3851.07,
         totalVal: 4858.97,
@@ -102,41 +108,35 @@ window.openGoldDrilldown = function() {
 
     content.innerHTML = `
         <div class="flex justify-between items-center mb-8">
-            <h2 class="text-3xl font-black italic uppercase">Digital Gold Vault</h2>
-            <button onclick="closeDrawer()" class="bg-black text-white px-6 py-2 rounded-full font-black uppercase text-xs">Back</button>
+            <h2 class="text-3xl font-black italic uppercase italic">Gold Vault</h2>
+            <button onclick="closeDrawer()" class="bg-black text-white px-6 py-2 rounded-full font-black text-xs">CLOSE</button>
         </div>
         <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="funky-card p-4 bg-white"><p class="text-[10px] font-black text-gray-400 uppercase">Invested</p><p class="text-xl font-black stat-val">₹${Math.round(gold.totalInv).toLocaleString()}</p></div>
-            <div class="funky-card p-4 c-gold"><p class="text-[10px] font-black uppercase">Net Worth</p><p class="text-xl font-black stat-val">₹${Math.round(gold.totalVal).toLocaleString()}</p></div>
+            <div class="funky-card p-4 bg-white border-2 border-black">
+                <p class="text-[10px] font-black uppercase text-gray-400">Invested</p>
+                <p class="text-xl font-black stat-val">₹${Math.round(gold.totalInv).toLocaleString()}</p>
+            </div>
+            <div class="funky-card p-4 c-gold border-2 border-black">
+                <p class="text-[10px] font-black uppercase">Net Value</p>
+                <p class="text-xl font-black stat-val">₹${Math.round(gold.totalVal).toLocaleString()}</p>
+            </div>
         </div>
         <div class="space-y-4">
             ${gold.platforms.map(p => `
                 <div class="funky-card p-6 flex justify-between items-center bg-white border-l-[12px] ${p.border}">
-                    <div>
-                        <h3 class="font-black text-xl italic uppercase">${p.name}</h3>
-                        <p class="text-[10px] font-bold text-gray-400">COST: ₹${p.inv.toLocaleString()}</p>
-                    </div>
-                    <div class="text-right">
-                        <p class="text-2xl font-black stat-val">₹${Math.round(p.val).toLocaleString()}</p>
-                        <span class="up-badge mt-1">+${p.gain}%</span>
-                    </div>
+                    <div><h3 class="font-black text-xl italic uppercase">${p.name}</h3><p class="text-[10px] font-bold text-gray-400">COST: ₹${p.inv.toLocaleString()}</p></div>
+                    <div class="text-right"><p class="text-2xl font-black stat-val">₹${Math.round(p.val).toLocaleString()}</p><span class="up-badge mt-1">+${p.gain}%</span></div>
                 </div>
             `).join('')}
-        </div>
-    `;
-
+        </div>`;
     drawer.classList.remove('opacity-0', 'pointer-events-none');
-    content.style.transform = "translateY(0)";
-};
+    document.getElementById('drawer-content').style.transform = "translateY(0)";
+}
 
-window.closeDrawer = function() {
-    const drawer = document.getElementById('detail-drawer');
-    const content = document.getElementById('drawer-content');
-    drawer.classList.add('opacity-0', 'pointer-events-none');
-    content.style.transform = "translateY(100%)";
-};
-
-// --- CHARTS & HELPERS ---
+function closeDrawer() {
+    document.getElementById('detail-drawer').classList.add('opacity-0', 'pointer-events-none');
+    document.getElementById('drawer-content').style.transform = "translateY(100%)";
+}
 
 function calculateGrowth(snapshotData, currentTotal) {
     if (!snapshotData || snapshotData.length === 0) return;
