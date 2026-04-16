@@ -3,18 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nami Wealth Terminal v10.2</title>
+    <title>Nami Wealth Terminal</title>
     <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body class="p-4 md:p-10 max-w-[1750px] mx-auto">
+<body class="p-4 md:p-10 max-w-[1750px] mx-auto relative">
+
+    <div id="build-tag" class="absolute top-4 right-4 md:top-10 md:right-10 font-mono text-[10px] font-black uppercase opacity-40 bg-black text-white px-2 py-1 rounded">
+        BUILD: v1.0.05-
+    </div>
 
     <div id="main-content">
         <header class="flex flex-col lg:flex-row justify-between items-start lg:items-center mb-10 gap-8">
             <div class="max-w-xl">
                 <h1 class="text-3xl md:text-5xl lg:text-6xl font-black italic nami-header uppercase">Nami Wealth Terminal</h1>
-                <p id="status-text" class="bg-black text-white inline-block px-3 py-1 text-[10px] font-black uppercase mt-2">Initialising 📡</p>
+                <p id="status-text" class="bg-black text-white inline-block px-3 py-1 text-[10px] font-black uppercase mt-2">Connecting... 📡</p>
             </div>
             
             <div class="funky-card bg-white p-6 md:p-10 text-center flex flex-col items-center justify-center w-full lg:w-auto min-w-full lg:min-w-[450px]">
@@ -47,6 +51,6 @@
         <div id="drawer-content" class="absolute bottom-0 left-0 right-0 bg-slate-100 rounded-t-[40px] p-8 translate-y-full transition-all duration-500 border-t-8 border-black max-h-[90vh] overflow-y-auto"></div>
     </div>
 
-    <script src="main.js"></script>
+    <script type="module" src="main.js"></script>
 </body>
 </html>
