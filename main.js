@@ -1,12 +1,10 @@
-/* main.js - v10.5.2 */
+/* main.js - v10.5.5 (Exact Header Mapping) */
 import { renderAssetCard, renderGoldDrilldown } from './components.js';
 
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
-const BUILD_VERSION = "v10.5.2";
+const BUILD_VERSION = "v10.5.5";
 
-window.vaultState = {
-    gold: []
-};
+window.vaultState = { gold: [] };
 
 window.onload = function() {
     const buildTag = document.getElementById('build-tag');
@@ -14,30 +12,36 @@ window.onload = function() {
     fetchNamiData();
 };
 
+// Helper to scrub Excel formatting
+function cleanNum(val) {
+    if (val === undefined || val === null || val === "") return 0;
+    return parseFloat(String(val).replace(/[₹$,%\s]/g, '').replace(/,/g, '')) || 0;
+}
+
 async function fetchNamiData() {
     const statusEl = document.getElementById('status-text');
     try {
         const response = await fetch(SHEET_URL);
         const fullData = await response.json();
-        
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
-        
-        // DYNAMIC DATA CAPTURE: Filtering based on your Excel Image
-        window.vaultState.gold = dashboardData.filter(item => 
-            String(item['sub-category'] || "").trim() === "Digital Gold"
-        ).map(item => ({
-            name: item.Platform || "Gold Asset",
-            invested: parseFloat(String(item['Investment'] || 0).replace(/[₹,]/g, '')) || 0,
-            value: parseFloat(String(item['Portfolio Valuation'] || 0).replace(/[₹,]/g, '')) || 0,
-            gain: parseFloat(String(item['Profit & Loss %'] || 0).replace(/[%]/g, '')) || 0
+
+        // Mapping Digital Gold using your EXACT headers
+        window.vaultState.gold = dashboardData.filter(item => {
+            const subCat = String(item["Sub-Category"] || "").trim();
+            return subCat === "Digital Gold";
+        }).map(item => ({
+            name: item["Platform"] || "Gold Asset",
+            invested: cleanNum(item["Investments"]),
+            value: cleanNum(item["Portfolio Valuation"]),
+            gain: cleanNum(item["Profit & Loss %"])
         }));
 
         let currentTotal = 0;
         let categorySums = {};
 
         dashboardData.forEach(item => {
-            const amt = parseFloat(String(item.amount).replace(/[$,%]/g, '')) || 0;
+            const amt = cleanNum(item.amount);
             if (amt > 0) {
                 currentTotal += amt;
                 const cat = String(item.Category || item.category || "Misc").trim();
@@ -46,46 +50,29 @@ async function fetchNamiData() {
         });
 
         document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
+        const container = document.getElementById('matrix-container');
+        if (container) container.innerHTML = dashboardData.map((item, index) => renderAssetCard(item, index)).join('');
         
-        renderCards(dashboardData);
-        
-        if (typeof Chart !== 'undefined') {
-            renderCharts(categorySums, snapshotData, currentTotal);
-        }
+        if (typeof Chart !== 'undefined') renderCharts(categorySums, snapshotData, currentTotal);
         
         calculateGrowth(snapshotData, currentTotal);
         statusEl.innerText = "System Live ⚡";
         statusEl.style.backgroundColor = "#22c55e"; 
-
     } catch (error) { 
         console.error("Fetch Error:", error); 
         statusEl.innerText = "Sync Failed ❌";
-        statusEl.style.backgroundColor = "#ef4444";
     }
-}
-
-function renderCards(data) {
-    const container = document.getElementById('matrix-container');
-    if (!container) return;
-    container.innerHTML = data.map((item, index) => renderAssetCard(item, index)).join('');
 }
 
 window.ui = {
     openDrilldown: (sub) => {
         const drawer = document.getElementById('detail-drawer');
         const content = document.getElementById('drawer-content');
-        
         if (sub === "Digital Gold") {
             content.innerHTML = renderGoldDrilldown(window.vaultState.gold);
         } else {
-            content.innerHTML = `
-                <div class="p-10 text-center">
-                    <h2 class="text-2xl font-black uppercase italic">${sub}</h2>
-                    <p class="text-gray-500 mt-2 font-bold uppercase text-xs">Analysis coming soon</p>
-                    <button onclick="ui.closeDrawer()" class="mt-8 bg-black text-white px-8 py-3 rounded-full font-black uppercase text-xs">Back</button>
-                </div>`;
+            content.innerHTML = `<div class="p-10 text-center font-black uppercase">${sub} Hub Coming Soon</div>`;
         }
-
         drawer.classList.remove('opacity-0', 'pointer-events-none');
         content.style.transform = "translateY(0)";
     },
@@ -99,7 +86,7 @@ function calculateGrowth(snapshotData, currentTotal) {
     if (!snapshotData || snapshotData.length === 0) return;
     const grouped = snapshotData.reduce((acc, curr) => {
         const dateKey = String(curr.Date || curr.date).trim();
-        const amt = parseFloat(String(curr.Amount || curr.amount).replace(/[$,%]/g, '')) || 0;
+        const amt = cleanNum(curr.Amount || curr.amount);
         if (dateKey && dateKey !== "undefined") acc[dateKey] = (acc[dateKey] || 0) + amt;
         return acc;
     }, {});
@@ -121,7 +108,7 @@ function renderCharts(catData, snapData, total) {
     const progCtx = document.getElementById('progressChart').getContext('2d');
     const grouped = snapData.reduce((acc, curr) => {
         const rawDate = String(curr.Date || curr.date || "").trim();
-        const amt = parseFloat(String(curr.Amount || curr.amount || 0).replace(/[$,%]/g, '')) || 0;
+        const amt = cleanNum(curr.Amount || curr.amount);
         if (rawDate && rawDate !== "undefined") {
             const date = new Date(rawDate);
             const cleanDate = isNaN(date.getTime()) ? rawDate : `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getMonth()]} ${date.getFullYear().toString().substr(-2)}`;
