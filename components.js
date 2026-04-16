@@ -20,15 +20,20 @@ export function renderAssetCard(item, index) {
 }
 
 export function renderGoldDrilldown(platforms) {
+    if (!platforms || platforms.length === 0) {
+        return `<div class="p-10 text-center font-black uppercase text-red-500">Error: No Gold Platforms detected in Sheet Data</div>`;
+    }
+
     const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
     const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
     const totalGain = totalInv > 0 ? (((totalVal - totalInv) / totalInv) * 100).toFixed(2) : 0;
 
     return `
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-black italic uppercase">Bullion Vault</h2>
+            <h2 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter">Bullion Vault</h2>
             <button onclick="ui.closeDrawer()" class="bg-black text-white px-5 py-2 rounded-full font-black uppercase text-xs">Back</button>
         </div>
+        
         <div class="grid grid-cols-2 gap-3 md:gap-4 mb-6">
             <div class="funky-card p-4 bg-white border-2 border-black">
                 <p class="text-[9px] md:text-[10px] font-black uppercase text-slate-400">Investments</p>
@@ -40,11 +45,18 @@ export function renderGoldDrilldown(platforms) {
                 <div class="up-badge mt-1 text-[9px] font-black">+${totalGain}%</div>
             </div>
         </div>
-        <div class="space-y-3">
+
+        <div class="space-y-3 md:space-y-4">
             ${platforms.map(p => `
-                <div class="funky-card p-4 flex justify-between items-center bg-white border-2 border-black">
-                    <div><p class="font-black italic text-lg uppercase">${p.name}</p><p class="text-[9px] font-bold text-slate-400">GAIN: +${p.gain}%</p></div>
-                    <div class="text-right"><p class="font-black text-xl stat-val">₹${Math.round(p.value).toLocaleString()}</p><p class="text-[9px] font-bold opacity-30">Cost: ₹${Math.round(p.invested).toLocaleString()}</p></div>
+                <div class="funky-card p-4 md:p-5 flex justify-between items-center bg-white border-2 border-black">
+                    <div>
+                        <p class="font-black italic text-base md:text-lg uppercase tracking-tight truncate">${p.name}</p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">GAIN: +${p.gain}%</p>
+                    </div>
+                    <div class="text-right">
+                        <p class="font-black text-lg md:text-xl stat-val">₹${Math.round(p.value).toLocaleString()}</p>
+                        <p class="text-[9px] font-bold opacity-30 uppercase">Invested: ₹${Math.round(p.invested).toLocaleString()}</p>
+                    </div>
                 </div>
             `).join('')}
         </div>`;
