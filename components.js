@@ -11,7 +11,7 @@ export const emojiMap = {
 };
 
 export function renderAssetCard(item, index) {
-    const sub = String(item['sub-category'] || "Asset").trim();
+    const sub = String(item["Sub-Category"] || item["sub-category"] || "Asset").trim();
     const amt = parseFloat(String(item.amount).replace(/[$,%]/g, '')) || 0;
     const cat = String(item.Category || "Misc").trim();
     
@@ -29,7 +29,10 @@ export function renderAssetCard(item, index) {
 }
 
 export function renderGoldDrilldown(platforms) {
-    // Math for consolidation
+    if (!platforms || platforms.length === 0) {
+        return `<div class="p-10 text-center font-black uppercase text-red-500">Error: No Gold Platforms detected in Sheet Data</div>`;
+    }
+
     const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
     const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
     const totalGain = totalInv > 0 ? (((totalVal - totalInv) / totalInv) * 100).toFixed(2) : 0;
@@ -42,11 +45,11 @@ export function renderGoldDrilldown(platforms) {
         
         <div class="grid grid-cols-2 gap-3 md:gap-4 mb-6">
             <div class="funky-card p-4 bg-white border-2 border-black">
-                <p class="text-[9px] md:text-[10px] font-black uppercase text-slate-400">Total Invested</p>
+                <p class="text-[9px] md:text-[10px] font-black uppercase text-slate-400">Investments</p>
                 <p class="text-lg md:text-xl font-black stat-val">₹${Math.round(totalInv).toLocaleString()}</p>
             </div>
             <div class="funky-card p-4 c-gold border-2 border-black">
-                <p class="text-[9px] md:text-[10px] font-black uppercase">Market Value</p>
+                <p class="text-[9px] md:text-[10px] font-black uppercase">Portfolio Valuation</p>
                 <p class="text-lg md:text-xl font-black stat-val">₹${Math.round(totalVal).toLocaleString()}</p>
                 <div class="up-badge mt-1 text-[9px] font-black tracking-widest">+${totalGain}%</div>
             </div>
@@ -61,7 +64,7 @@ export function renderGoldDrilldown(platforms) {
                     </div>
                     <div class="text-right">
                         <p class="font-black text-lg md:text-xl stat-val">₹${Math.round(p.value).toLocaleString()}</p>
-                        <p class="text-[9px] font-bold opacity-30 uppercase">Cost: ₹${Math.round(p.invested).toLocaleString()}</p>
+                        <p class="text-[9px] font-bold opacity-30 uppercase">Invested: ₹${Math.round(p.invested).toLocaleString()}</p>
                     </div>
                 </div>
             `).join('')}
