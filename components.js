@@ -29,9 +29,10 @@ export function renderAssetCard(item, index) {
 }
 
 export function renderGoldDrilldown(platforms) {
+    // Math for consolidation
     const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
     const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
-    const totalGain = totalInv > 0 ? ((totalVal - totalInv) / totalInv * 100).toFixed(2) : 0;
+    const totalGain = totalInv > 0 ? (((totalVal - totalInv) / totalInv) * 100).toFixed(2) : 0;
 
     return `
         <div class="flex justify-between items-center mb-6">
@@ -47,7 +48,7 @@ export function renderGoldDrilldown(platforms) {
             <div class="funky-card p-4 c-gold border-2 border-black">
                 <p class="text-[9px] md:text-[10px] font-black uppercase">Market Value</p>
                 <p class="text-lg md:text-xl font-black stat-val">₹${Math.round(totalVal).toLocaleString()}</p>
-                <div class="up-badge mt-1 text-[9px]">+${totalGain}%</div>
+                <div class="up-badge mt-1 text-[9px] font-black tracking-widest">+${totalGain}%</div>
             </div>
         </div>
 
