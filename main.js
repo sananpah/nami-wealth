@@ -4,17 +4,13 @@ import { renderAssetCard, renderGoldDrilldown } from './components.js';
 const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
 const BUILD_VERSION = "v10.5.2";
 
-// Global state to hold platform-specific details from the sheet
 window.vaultState = {
     gold: []
 };
 
 window.onload = function() {
-    console.log("Nami Terminal Booting...");
-    // Set build version on top right
     const buildTag = document.getElementById('build-tag');
     if (buildTag) buildTag.innerText = `BUILD: ${BUILD_VERSION}`;
-    
     fetchNamiData();
 };
 
@@ -27,13 +23,13 @@ async function fetchNamiData() {
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
         
-        // DYNAMIC DATA CAPTURE: Sieve Gold Platforms from the sheet
+        // DYNAMIC DATA CAPTURE: Filtering based on your Excel Image
         window.vaultState.gold = dashboardData.filter(item => 
             String(item['sub-category'] || "").trim() === "Digital Gold"
         ).map(item => ({
             name: item.Platform || "Gold Asset",
-            invested: parseFloat(String(item.Investment || item.amount || 0).replace(/[₹,]/g, '')) || 0,
-            value: parseFloat(String(item['Portfolio Valuation'] || item.amount || 0).replace(/[₹,]/g, '')) || 0,
+            invested: parseFloat(String(item['Investment'] || 0).replace(/[₹,]/g, '')) || 0,
+            value: parseFloat(String(item['Portfolio Valuation'] || 0).replace(/[₹,]/g, '')) || 0,
             gain: parseFloat(String(item['Profit & Loss %'] || 0).replace(/[%]/g, '')) || 0
         }));
 
@@ -51,10 +47,8 @@ async function fetchNamiData() {
 
         document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
         
-        // Render the Grid Cards
         renderCards(dashboardData);
         
-        // Initialize Charts
         if (typeof Chart !== 'undefined') {
             renderCharts(categorySums, snapshotData, currentTotal);
         }
@@ -76,7 +70,6 @@ function renderCards(data) {
     container.innerHTML = data.map((item, index) => renderAssetCard(item, index)).join('');
 }
 
-// UI Controller for the slide-up Drawer
 window.ui = {
     openDrilldown: (sub) => {
         const drawer = document.getElementById('detail-drawer');
@@ -118,7 +111,6 @@ function calculateGrowth(snapshotData, currentTotal) {
 }
 
 function renderCharts(catData, snapData, total) {
-    // Category Donut
     const catCtx = document.getElementById('categoryChart').getContext('2d');
     new Chart(catCtx, {
         type: 'doughnut',
@@ -126,7 +118,6 @@ function renderCharts(catData, snapData, total) {
         options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', family: 'Outfit', size: 10 }, color: '#000' } } } }
     });
 
-    // Progress Line
     const progCtx = document.getElementById('progressChart').getContext('2d');
     const grouped = snapData.reduce((acc, curr) => {
         const rawDate = String(curr.Date || curr.date || "").trim();
