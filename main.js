@@ -1,12 +1,19 @@
 /* main.js */
-import { SHEET_URL, BUILD_VERSION, findValue, cleanNum } from './utils.js';
-import { renderAssetCard, renderGoldDrilldown } from './components.js';
+
+// Dynamic imports to allow cache-busting via the VERSION defined in index.html
+const version = window.BUILD_VERSION || "10.6.1";
+const utils = await import(`./utils.js?v=${version}`);
+const components = await import(`./components.js?v=${version}`);
+
+// Mapping the imported functions to match your original code's variable names
+const { SHEET_URL, findValue, cleanNum } = utils;
+const { renderAssetCard, renderGoldDrilldown } = components;
 
 window.vaultState = { gold: [] };
 
 window.onload = function() {
     const buildTag = document.getElementById('build-tag');
-    if (buildTag) buildTag.innerText = `BUILD: ${BUILD_VERSION}`;
+    if (buildTag) buildTag.innerText = `BUILD: v${version}`;
     fetchNamiData();
 };
 
@@ -18,7 +25,7 @@ async function fetchNamiData() {
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
 
-        // Dynamic Sieve for Gold Platforms
+        // --- Your Exact Sieve Logic ---
         window.vaultState.gold = dashboardData.filter(item => {
             const subCat = String(findValue(item, "Sub-Category") || "").trim();
             return subCat.toLowerCase() === "digital gold";
@@ -42,9 +49,10 @@ async function fetchNamiData() {
         });
 
         document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
+        
+        // --- Your Exact Rendering Logic ---
         document.getElementById('matrix-container').innerHTML = dashboardData.map((item, index) => renderAssetCard(item, index)).join('');
         
-        // Render Charts
         if (window.Chart) {
             renderCharts(categorySums, snapshotData, currentTotal);
         }
@@ -57,7 +65,7 @@ async function fetchNamiData() {
     }
 }
 
-// Global UI Controller
+// --- Your Exact UI Controller ---
 window.ui = {
     openDrilldown: (sub) => {
         const drawer = document.getElementById('detail-drawer');
@@ -74,6 +82,7 @@ window.ui = {
     }
 };
 
+// --- Your Exact Charting Logic ---
 function renderCharts(catData, snapData, total) {
     const catCtx = document.getElementById('categoryChart').getContext('2d');
     new Chart(catCtx, {
@@ -93,10 +102,12 @@ function renderCharts(catData, snapData, total) {
         }
         return acc;
     }, {});
+    
     let labels = Object.keys(grouped);
     let values = Object.values(grouped);
     labels.push("Live");
     values.push(total);
+    
     new Chart(progCtx, {
         type: 'line',
         data: { labels: labels, datasets: [{ data: values, borderColor: '#000', borderWidth: 4, pointRadius: 5, pointBackgroundColor: '#FF00FF', tension: 0.3, fill: false }] },
