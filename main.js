@@ -94,8 +94,9 @@ let progChartInstance = null;
 
 function renderCharts(catData, snapData, liveTotal) {
     // A. Doughnut Chart
-    const catCtx = document.getElementById('categoryChart').getContext('2d');
+const catCtx = document.getElementById('categoryChart').getContext('2d');
     if (catChartInstance) catChartInstance.destroy();
+    
     catChartInstance = new Chart(catCtx, {
         type: 'doughnut',
         data: { 
@@ -103,10 +104,40 @@ function renderCharts(catData, snapData, liveTotal) {
             datasets: [{ 
                 data: Object.values(catData), 
                 backgroundColor: ['#FF00FF', '#00FFFF', '#FFD700', '#39FF14', '#FF5F1F', '#8A2BE2', '#FF004D'], 
-                borderColor: '#000', borderWidth: 4 
+                borderColor: '#000', 
+                borderWidth: 4 
             }] 
         },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom' } } }
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false,
+            // 1. Add padding to the bottom so legends aren't cut off
+            layout: {
+                padding: {
+                    bottom: 25,
+                    top: 10
+                }
+            },
+            plugins: { 
+                legend: { 
+                    display: true, // 2. Force display to true
+                    position: 'bottom', 
+                    align: 'center',
+                    labels: { 
+                        // 3. Style the legends to be bold and clean
+                        font: { 
+                            weight: '900', 
+                            family: 'Outfit', 
+                            size: 10 
+                        }, 
+                        color: '#000',
+                        padding: 15,
+                        usePointStyle: true, // Makes legend markers circles instead of squares
+                        boxWidth: 10
+                    } 
+                } 
+            } 
+        }
     });
 
     // B. Line Chart
