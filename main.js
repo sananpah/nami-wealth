@@ -1,8 +1,7 @@
 /* main.js */
 
-// Use absolute relative path for Edge consistency - Incrementing version to 10.6.5
-import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.3';
-import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.3';
+import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.4';
+import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.4';
 
 console.log(">>> ENGINE START: Edge has cleared the imports!");
 
@@ -26,17 +25,21 @@ async function fetchNamiData() {
     try {
         const response = await fetch(SHEET_URL);
         const fullData = await response.json();
-        const dashboardData = fullData.dashboard || [];
-        const snapshotData = fullData.snapshot || []; // Ensure we grab the snapshot tab
         
-        // 1. Populate the Vault
+        // Tab 1: Live Data
+        const dashboardData = fullData.dashboard || [];
+        // Tab 2: Historical Data
+        const snapshotData = fullData.snapshot || [];
+        
+        // 1. Populate the Vault for Drilldowns
         window.vaultState.gold = getAssetGroup(dashboardData, "Digital Gold");
 
-        // 2. Calculate Totals
+        // 2. Calculate Live Totals from Dashboard Tab
         let currentTotal = 0;
         let categorySums = {};
 
         dashboardData.forEach(item => {
+            // CRITICAL: Pulling from "Portfolio Valuation" per your screenshot
             const val = findValue(item, "Portfolio Valuation");
             const amt = cleanNum(val);
             if (amt > 0) {
@@ -57,14 +60,15 @@ async function fetchNamiData() {
             .map((item, index) => renderAssetCard(item, index))
             .join('');
 
-        // 5. FIX: Call the Chart logic here
+        // 5. Render Charts: Passing snapshot data and the calculated live total
         if (window.Chart) {
             renderCharts(categorySums, snapshotData, currentTotal);
         }
 
         statusEl.innerText = "System Live ⚡";
+        statusEl.style.backgroundColor = "#22c55e"; 
     } catch (error) {
-        console.error("Fetch Error:", error);
+        console.error("Fetch/Render Error:", error);
         statusEl.innerText = "Sync Failed ❌";
     }
 }
@@ -74,11 +78,9 @@ window.ui = {
     openDrilldown: (sub) => {
         const drawer = document.getElementById('detail-drawer');
         const content = document.getElementById('drawer-content');
-        
         const subLower = sub.toLowerCase().trim();
         
         if (subLower === "digital gold") {
-            // FIX: Pass BOTH the Title string AND the Data array
             content.innerHTML = renderDrilldown("Bullion Vault", window.vaultState.gold);
         } 
 
@@ -91,21 +93,38 @@ window.ui = {
     }
 };
 
-function renderCharts(catData, snapData, total) {
+function renderCharts(catData, snapData, liveTotal) {
+    // A. Doughnut Chart (Asset Distribution)
     const catCtx = document.getElementById('categoryChart').getContext('2d');
     new Chart(catCtx, {
         type: 'doughnut',
-        data: { labels: Object.keys(catData), datasets: [{ data: Object.values(catData), backgroundColor: ['#FF00FF', '#00FFFF', '#FFD700', '#39FF14', '#FF5F1F', '#8A2BE2', '#FF004D'], borderColor: '#000', borderWidth: 4 }] },
-        options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', family: 'Outfit', size: 10 }, color: '#000' } } } }
+        data: { 
+            labels: Object.keys(catData), 
+            datasets: [{ 
+                data: Object.values(catData), 
+                backgroundColor: ['#FF00FF', '#00FFFF', '#FFD700', '#39FF14', '#FF5F1F', '#8A2BE2', '#FF004D'], 
+                borderColor: '#000', 
+                borderWidth: 4 
+            }] 
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            plugins: { legend: { position: 'bottom', labels: { font: { weight: 'bold', family: 'Outfit', size: 10 }, color: '#000' } } } 
+        }
     });
 
+    // B. Line Chart (Wealth Progression)
     const progCtx = document.getElementById('progressChart').getContext('2d');
+    
+    // Process Snapshot Tab data
     const grouped = snapData.reduce((acc, curr) => {
         const rawDate = String(findValue(curr, "Date") || "").trim();
-        const amt = cleanNum(findValue(curr, "Amount"));
+        const amt = cleanNum(findValue(curr, "Amount")); // Looking for "Amount" in Snapshot tab
         if (rawDate) {
             const date = new Date(rawDate);
-            const cleanDate = isNaN(date.getTime()) ? rawDate : `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getMonth()]} ${date.getFullYear().toString().substr(-2)}`;
+            const cleanDate = isNaN(date.getTime()) ? rawDate : 
+                `${["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"][date.getMonth()]} ${date.getFullYear().toString().substr(-2)}`;
             acc[cleanDate] = (acc[cleanDate] || 0) + amt;
         }
         return acc;
@@ -113,13 +132,38 @@ function renderCharts(catData, snapData, total) {
     
     let labels = Object.keys(grouped);
     let values = Object.values(grouped);
+    
+    // C. THE LIVE INJECTION: Add the dashboard total as the final point
     labels.push("Live");
-    values.push(total);
+    values.push(liveTotal);
     
     new Chart(progCtx, {
         type: 'line',
-        data: { labels: labels, datasets: [{ data: values, borderColor: '#000', borderWidth: 4, pointRadius: 5, pointBackgroundColor: '#FF00FF', tension: 0.3, fill: false }] },
-        options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { font: { size: 10, family: 'Space Mono' }, callback: v => '$' + Math.round(v/1000) + 'k' } } }, plugins: { legend: { display: false } } }
+        data: { 
+            labels: labels, 
+            datasets: [{ 
+                data: values, 
+                borderColor: '#000', 
+                borderWidth: 4, 
+                pointRadius: 5, 
+                pointBackgroundColor: '#FF00FF', 
+                tension: 0.3, 
+                fill: false 
+            }] 
+        },
+        options: { 
+            responsive: true, 
+            maintainAspectRatio: false, 
+            scales: { 
+                y: { 
+                    ticks: { 
+                        font: { size: 10, family: 'Space Mono' }, 
+                        callback: v => '$' + Math.round(v/1000) + 'k' 
+                    } 
+                } 
+            }, 
+            plugins: { legend: { display: false } } 
+        }
     });
 }
 
