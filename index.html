@@ -53,17 +53,19 @@
 
     <script type="module">
         // Change this version number whenever you push a change to force a refresh
-        const VERSION = "10.6.2"; 
+        const VERSION = "10.6.3"; 
         window.BUILD_VERSION = VERSION;
         
         // Update the top-right tag immediately
         const tag = document.getElementById('build-tag');
         if(tag) tag.innerText = `BUILD: v${VERSION}`;
 
-        // Dynamically import the main engine with the version query string
-        import(`./main.js?v=${VERSION}`).catch(err => {
-            document.getElementById('status-text').innerText = "Terminal Error ❌";
-            console.error("Critical Load Error:", err);
+        // Using a relative path that works across all Chromium browsers
+        import('./main.js?v=' + VERSION).then(() => {
+            console.log("Terminal Booted");
+        }).catch(err => {
+            document.getElementById('status-text').innerText = "Path Error ❌";
+            console.error(err);
         });
     </script>
 </body>
