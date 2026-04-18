@@ -54,17 +54,15 @@
      <script type="module">
         const VERSION = "10.6.4"; 
         
-        // Update the UI tag
         const tag = document.getElementById('build-tag');
         if(tag) tag.innerText = `BUILD: v${VERSION}`;
     
-        // Load main.js with cache buster
         import(`./main.js?v=${VERSION}`).then(() => {
-            console.log("Terminal Booted");
+            console.log("JS Module Handshake Successful ✅");
         }).catch(err => {
             document.getElementById('status-text').innerText = "Terminal Crash ❌";
-            console.error(err);
-        });
-    </script>
+            console.error("Module Import Failed:", err);
+    });
+</script>
 </body>
 </html>
