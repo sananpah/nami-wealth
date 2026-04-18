@@ -1,9 +1,9 @@
 /* main.js */
 
-import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.5';
-import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.5';
+import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.6';
+import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.6';
 
-console.log(">>> ENGINE START: Logic v1.1.5 Activated");
+console.log(">>> ENGINE START: Logic v1.1.6 Activated");
 
 window.vaultState = { gold: [] };
 
