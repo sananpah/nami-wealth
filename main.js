@@ -1,65 +1,63 @@
 /* main.js */
 
-// Use absolute relative path for Edge consistency
-import { SHEET_URL, findValue, cleanNum } from './utils.js?v=10.6.4';
-import { renderAssetCard, renderGoldDrilldown } from './components.js?v=10.6.4';
+// Use absolute relative path for Edge consistency - Incrementing version to 10.6.5
+import { SHEET_URL, findValue, cleanNum } from './utils.js?v=10.6.5';
+import { renderAssetCard, renderGoldDrilldown } from './components.js?v=10.6.5';
 
 console.log(">>> ENGINE START: Edge has cleared the imports!");
 
 window.vaultState = { gold: [] };
 
-// Log immediately to prove the file is executing
-console.log("Main.js execution started. Target URL:", SHEET_URL);
+// THE FACTORY: This function handles ANY asset group you add in the future
+function getAssetGroup(data, subCategoryName) {
+    return data.filter(item => {
+        const val = String(findValue(item, "Sub-Category") || "").toLowerCase();
+        return val.includes(subCategoryName.toLowerCase());
+    }).map(item => ({
+        name: findValue(item, "Platform") || "Unknown",
+        invested: cleanNum(findValue(item, "Investments")),
+        value: cleanNum(findValue(item, "Portfolio Valuation")),
+        gain: cleanNum(findValue(item, "Profit & Loss %"))
+    }));
+}
 
 async function fetchNamiData() {
     const statusEl = document.getElementById('status-text');
-    console.log("fetchNamiData function invoked...");
-
     try {
         const response = await fetch(SHEET_URL);
-        console.log("Response received from Google Sheets");
-        
         const fullData = await response.json();
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
+        
+        // 1. Map Digital Gold
+        window.vaultState.gold = getAssetGroup(dashboardData, "Digital Gold");
 
-        // Dynamic Sieve for Gold Platforms
-        window.vaultState.gold = dashboardData.filter(item => {
-            const subCat = String(findValue(item, "Sub-Category") || "").trim();
-            return subCat.toLowerCase() === "digital gold";
-        }).map(item => ({
-            name: findValue(item, "Platform") || "Gold Asset",
-            invested: cleanNum(findValue(item, "Investments")),
-            value: cleanNum(findValue(item, "Portfolio Valuation")),
-            gain: cleanNum(findValue(item, "Profit & Loss %"))
-        }));
-
+        // --- Render Logic ---
         let currentTotal = 0;
         let categorySums = {};
 
         dashboardData.forEach(item => {
-            const amt = cleanNum(item.amount || item.Amount);
+            const amt = cleanNum(findValue(item, "Portfolio Valuation"));
             if (amt > 0) {
                 currentTotal += amt;
                 const cat = String(findValue(item, "Category") || "Misc").trim();
-                if (cat && cat !== "undefined") categorySums[cat] = (categorySums[cat] || 0) + amt;
+                categorySums[cat] = (categorySums[cat] || 0) + amt;
             }
         });
 
         document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
         document.getElementById('matrix-container').innerHTML = dashboardData.map((item, index) => renderAssetCard(item, index)).join('');
         
+        // --- CHART LOGIC: This MUST be called here ---
         if (window.Chart) {
             renderCharts(categorySums, snapshotData, currentTotal);
         }
-        
+
         statusEl.innerText = "System Live ⚡";
         statusEl.style.backgroundColor = "#22c55e"; 
-        console.log("Terminal Fully Loaded and Rendered.");
-
     } catch (error) { 
         statusEl.innerText = "Sync Failed ❌";
-        console.error("Data Load Error:", error);
+        console.error("Fetch/Render Error:", error);
     }
 }
 
@@ -68,9 +66,13 @@ window.ui = {
     openDrilldown: (sub) => {
         const drawer = document.getElementById('detail-drawer');
         const content = document.getElementById('drawer-content');
-        if (sub.toLowerCase().trim() === "digital gold") {
+        
+        const subLower = sub.toLowerCase().trim();
+        
+        if (subLower === "digital gold") {
             content.innerHTML = renderGoldDrilldown(window.vaultState.gold);
-        }
+        } 
+
         drawer.classList.remove('opacity-0', 'pointer-events-none');
         content.style.transform = "translateY(0)";
     },
@@ -112,5 +114,5 @@ function renderCharts(catData, snapData, total) {
     });
 }
 
-// INSTEAD OF WINDOW.ONLOAD, WE CALL IT DIRECTLY AT THE END OF THE MODULE
+// Initial Kick-off
 fetchNamiData();
