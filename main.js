@@ -4,18 +4,18 @@ import { renderAssetCard, renderGoldDrilldown } from './components.js';
 
 window.vaultState = { gold: [] };
 
-window.onload = function() {
-    // The version is handled by index.html now
-    fetchNamiData();
-};
+// Log immediately to prove the file is executing
+console.log("Main.js execution started. Target URL:", SHEET_URL);
 
 async function fetchNamiData() {
     const statusEl = document.getElementById('status-text');
+    console.log("fetchNamiData function invoked...");
+
     try {
-        console.log("Fetching data from:", SHEET_URL); // Debug log
         const response = await fetch(SHEET_URL);
-        const fullData = await response.json();
+        console.log("Response received from Google Sheets");
         
+        const fullData = await response.json();
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
 
@@ -51,7 +51,7 @@ async function fetchNamiData() {
         
         statusEl.innerText = "System Live ⚡";
         statusEl.style.backgroundColor = "#22c55e"; 
-        console.log("Terminal Fully Loaded"); // Debug log
+        console.log("Terminal Fully Loaded and Rendered.");
 
     } catch (error) { 
         statusEl.innerText = "Sync Failed ❌";
@@ -76,7 +76,6 @@ window.ui = {
     }
 };
 
-// --- Your Exact Charting Logic ---
 function renderCharts(catData, snapData, total) {
     const catCtx = document.getElementById('categoryChart').getContext('2d');
     new Chart(catCtx, {
@@ -108,3 +107,6 @@ function renderCharts(catData, snapData, total) {
         options: { responsive: true, maintainAspectRatio: false, scales: { y: { ticks: { font: { size: 10, family: 'Space Mono' }, callback: v => '$' + Math.round(v/1000) + 'k' } } }, plugins: { legend: { display: false } } }
     });
 }
+
+// INSTEAD OF WINDOW.ONLOAD, WE CALL IT DIRECTLY AT THE END OF THE MODULE
+fetchNamiData();
