@@ -51,20 +51,18 @@
         <div id="drawer-content" class="absolute bottom-0 left-0 right-0 bg-slate-100 rounded-t-[40px] p-8 translate-y-full transition-all duration-500 border-t-8 border-black max-h-[90vh] overflow-y-auto"></div>
     </div>
 
-    <script type="module">
-        // Change this version number whenever you push a change to force a refresh
-        const VERSION = "10.6.3"; 
-        window.BUILD_VERSION = VERSION;
+     <script type="module">
+        const VERSION = "10.6.4"; 
         
-        // Update the top-right tag immediately
+        // Update the UI tag
         const tag = document.getElementById('build-tag');
         if(tag) tag.innerText = `BUILD: v${VERSION}`;
-
-        // Using a relative path that works across all Chromium browsers
-        import('./main.js?v=' + VERSION).then(() => {
+    
+        // Load main.js with cache buster
+        import(`./main.js?v=${VERSION}`).then(() => {
             console.log("Terminal Booted");
         }).catch(err => {
-            document.getElementById('status-text').innerText = "Path Error ❌";
+            document.getElementById('status-text').innerText = "Terminal Crash ❌";
             console.error(err);
         });
     </script>
