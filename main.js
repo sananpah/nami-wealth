@@ -1,8 +1,8 @@
 /* main.js */
 
 // Use absolute relative path for Edge consistency - Incrementing version to 10.6.5
-import { SHEET_URL, findValue, cleanNum } from './utils.js?v=10.6.5';
-import { renderAssetCard, renderGoldDrilldown } from './components.js?v=10.6.5';
+import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.2';
+import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.2';
 
 console.log(">>> ENGINE START: Edge has cleared the imports!");
 
@@ -70,7 +70,7 @@ window.ui = {
         const subLower = sub.toLowerCase().trim();
         
         if (subLower === "digital gold") {
-            content.innerHTML = renderGoldDrilldown(window.vaultState.gold);
+            content.innerHTML = renderDrilldown(window.vaultState.gold);
         } 
 
         drawer.classList.remove('opacity-0', 'pointer-events-none');
