@@ -1,14 +1,18 @@
 /* components.js */
 
-const version = window.BUILD_VERSION || "1.1.3";
-const utils = await import('./utils.js?v=' + version);
-const { emojiMap, findValue } = utils;
+// Standard import is more reliable for Edge/Brave than top-level await imports
+import { emojiMap, findValue, cleanNum } from './utils.js?v=1.1.4';
 
 export function renderAssetCard(item, index) {
     const sub = String(findValue(item, "Sub-Category") || "Asset").trim();
-    const amt = parseFloat(String(item.amount || item.Amount || 0).replace(/[$,%]/g, '')) || 0;
+    
+    // FIX: Instead of item.amount, we use findValue to target "Portfolio Valuation"
+    const rawAmt = findValue(item, "Portfolio Valuation");
+    const amt = cleanNum(rawAmt);
+    
     const cat = String(findValue(item, "Category") || "Misc").trim();
     
+    // Maintain your dynamic coloring
     let colorClass = "c-" + (((index % 11) + 1).toString().padStart(2, '0'));
     if (sub === "Digital Gold") colorClass = "c-gold";
 
@@ -27,8 +31,9 @@ export function renderDrilldown(title, platforms) {
         return `<div class="p-10 text-center font-black uppercase text-red-500">No Data found for ${title}</div>`;
     }
 
-    const totalInv = platforms.reduce((acc, p) => acc + (p.invested || 0), 0);
-    const totalVal = platforms.reduce((acc, p) => acc + (p.value || 0), 0);
+    // Safety: Ensure values are treated as numbers during reduction
+    const totalInv = platforms.reduce((acc, p) => acc + (Number(p.invested) || 0), 0);
+    const totalVal = platforms.reduce((acc, p) => acc + (Number(p.value) || 0), 0);
 
     return `
         <div class="flex justify-between items-center mb-6">
@@ -48,7 +53,10 @@ export function renderDrilldown(title, platforms) {
         <div class="space-y-3">
             ${platforms.map(p => `
                 <div class="p-4 flex justify-between items-center bg-white border-2 border-black">
-                    <p class="font-black uppercase">${p.name}</p>
+                    <div>
+                        <p class="font-black uppercase">${p.name}</p>
+                        <p class="text-[10px] opacity-50 font-bold uppercase">Gain: ${p.gain}%</p>
+                    </div>
                     <p class="font-black stat-val">₹${Math.round(p.value).toLocaleString()}</p>
                 </div>
             `).join('')}
