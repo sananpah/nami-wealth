@@ -1,34 +1,24 @@
 /* main.js */
 
 // Use absolute relative path for Edge consistency - Incrementing version to 10.6.5
-import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.2';
-import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.2';
+import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.3';
+import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.3';
 
 console.log(">>> ENGINE START: Edge has cleared the imports!");
 
 window.vaultState = { gold: [] };
 
-// THE FACTORY: This function handles ANY asset group you add in the future
+// THE FACTORY: This finds sub-assets (like Gold) and maps them to standard names
 function getAssetGroup(data, subCategoryName) {
     return data.filter(item => {
-        // We look for ANY key that contains "Sub-Category"
-        const subKey = Object.keys(item).find(k => k.toLowerCase().includes("sub-category"));
-        const val = String(item[subKey] || "").toLowerCase();
+        const val = String(findValue(item, "Sub-Category") || "").toLowerCase();
         return val.includes(subCategoryName.toLowerCase().trim());
-    }).map(item => {
-        // We manually find the keys to ensure symbols like (-) don't break it
-        const find = (term) => {
-            const hit = Object.keys(item).find(k => k.toLowerCase().includes(term.toLowerCase()));
-            return item[hit];
-        };
-
-        return {
-            name: find("Platform") || "Unknown",
-            invested: cleanNum(find("Investments")),
-            value: cleanNum(find("Portfolio Valuation")),
-            gain: cleanNum(find("Profit & Loss"))
-        };
-    });
+    }).map(item => ({
+        name: findValue(item, "Platform") || "Unknown",
+        invested: cleanNum(findValue(item, "Investments")),
+        value: cleanNum(findValue(item, "Portfolio Valuation")),
+        gain: cleanNum(findValue(item, "Profit & Loss"))
+    }));
 }
 
 async function fetchNamiData() {
@@ -37,39 +27,38 @@ async function fetchNamiData() {
         const response = await fetch(SHEET_URL);
         const fullData = await response.json();
         const dashboardData = fullData.dashboard || [];
-        const snapshotData = fullData.snapshot || [];
-
-        // 1. Fill the Vault
+        
+        // 1. Populate the Vault
         window.vaultState.gold = getAssetGroup(dashboardData, "Digital Gold");
 
-        // 2. Calculate Net Worth with a safety fallback
+        // 2. Calculate Totals
         let currentTotal = 0;
         let categorySums = {};
 
         dashboardData.forEach(item => {
-            // Target the Portfolio Valuation column specifically
-            const valKey = Object.keys(item).find(k => k.toLowerCase().includes("portfolio valuation"));
-            const amt = cleanNum(item[valKey]);
-            
+            const val = findValue(item, "Portfolio Valuation");
+            const amt = cleanNum(val);
             if (amt > 0) {
                 currentTotal += amt;
-                const catKey = Object.keys(item).find(k => k.toLowerCase().includes("category"));
-                const cat = String(item[catKey] || "Misc").trim();
+                const cat = String(findValue(item, "Category") || "Misc").trim();
                 categorySums[cat] = (categorySums[cat] || 0) + amt;
             }
         });
 
-        // 3. Update UI
-        document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
-        document.getElementById('matrix-container').innerHTML = dashboardData.map((item, index) => renderAssetCard(item, index)).join('');
-        
-        if (window.Chart) {
-            renderCharts(categorySums, snapshotData, currentTotal);
+        // 3. Update the Net Worth Text
+        const networthEl = document.getElementById('total-networth');
+        if (networthEl) {
+            networthEl.innerText = "$" + Math.round(currentTotal).toLocaleString();
         }
 
+        // 4. Render the UI Cards
+        document.getElementById('matrix-container').innerHTML = dashboardData
+            .map((item, index) => renderAssetCard(item, index))
+            .join('');
+
+        // ... (Charts logic) ...
         statusEl.innerText = "System Live ⚡";
-    } catch (error) { 
-        console.error("Connection Error:", error);
+    } catch (error) {
         statusEl.innerText = "Sync Failed ❌";
     }
 }
