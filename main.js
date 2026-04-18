@@ -1,9 +1,9 @@
 /* main.js */
 
 // Dynamic imports to allow cache-busting via the VERSION defined in index.html
-const version = window.BUILD_VERSION || "10.6.1";
-const utils = await import(`./utils.js?v=${version}`);
-const components = await import(`./components.js?v=${version}`);
+const version = window.BUILD_VERSION || "10.6.2";
+const utils = await import('./utils.js?v=' + version);
+const components = await import('./components.js?v=' + version);
 
 // Mapping the imported functions to match your original code's variable names
 const { SHEET_URL, findValue, cleanNum } = utils;
