@@ -10,8 +10,8 @@
 </head>
 <body class="p-4 md:p-10 max-w-[1750px] mx-auto relative">
 
-    <div id="build-tag" class="absolute top-4 right-4 md:top-10 md:right-10 font-mono text-[10px] font-black uppercase opacity-40 bg-black text-white px-2 py-1 rounded">
-        BUILD: v1.0.05-
+    <div id="build-tag" class="absolute top-4 right-4 md:top-10 md:right-10 font-mono text-[10px] font-black uppercase opacity-60 bg-black text-white px-2 py-1 rounded z-50">
+        BUILD: LOADING...
     </div>
 
     <div id="main-content">
@@ -51,6 +51,20 @@
         <div id="drawer-content" class="absolute bottom-0 left-0 right-0 bg-slate-100 rounded-t-[40px] p-8 translate-y-full transition-all duration-500 border-t-8 border-black max-h-[90vh] overflow-y-auto"></div>
     </div>
 
-    <script type="module" src="main.js"></script>
+    <script type="module">
+        // Change this version number whenever you push a change to force a refresh
+        const VERSION = "10.6.1"; 
+        window.BUILD_VERSION = VERSION;
+        
+        // Update the top-right tag immediately
+        const tag = document.getElementById('build-tag');
+        if(tag) tag.innerText = `BUILD: v${VERSION}`;
+
+        // Dynamically import the main engine with the version query string
+        import(`./main.js?v=${VERSION}`).catch(err => {
+            document.getElementById('status-text').innerText = "Terminal Error ❌";
+            console.error("Critical Load Error:", err);
+        });
+    </script>
 </body>
 </html>
