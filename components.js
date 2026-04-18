@@ -1,7 +1,6 @@
 /* components.js */
 
-/* components.js */
-const version = window.BUILD_VERSION || "10.6.2";
+const version = window.BUILD_VERSION || "10.6.3";
 const utils = await import('./utils.js?v=' + version);
 const { emojiMap, findValue } = utils;
 
@@ -23,20 +22,23 @@ export function renderAssetCard(item, index) {
         </div>`;
 }
 
-/* components.js */
-
 export function renderDrilldown(title, platforms) {
-    if (!platforms || platforms.length === 0) {
+    // 1. Safety check: If platforms is empty or not an array
+    if (!platforms || !Array.isArray(platforms) || platforms.length === 0) {
         return `<div class="p-10 text-center font-black uppercase text-red-500">No data found for ${title}</div>`;
     }
 
-    const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
-    const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
-    const totalGain = totalInv > 0 ? (((totalVal - totalInv) / totalInv) * 100).toFixed(2) : 0;
+    // 2. Add (p.value || 0) to prevent the "Missing Networth" / NaN issue
+    const totalInv = platforms.reduce((acc, p) => acc + (Number(p.invested) || 0), 0);
+    const totalVal = platforms.reduce((acc, p) => acc + (Number(p.value) || 0), 0);
+    
+    const totalGain = totalInv > 0 
+        ? (((totalVal - totalInv) / totalInv) * 100).toFixed(2) 
+        : "0.00";
 
     return `
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter">${title} Hub</h2>
+            <h2 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter">${title}</h2>
             <button onclick="ui.closeDrawer()" class="bg-black text-white px-5 py-2 rounded-full font-black uppercase text-xs">Back</button>
         </div>
         
@@ -45,10 +47,10 @@ export function renderDrilldown(title, platforms) {
                 <p class="text-[9px] font-black uppercase text-slate-400">Total Invested</p>
                 <p class="text-lg font-black stat-val">₹${Math.round(totalInv).toLocaleString()}</p>
             </div>
-            <div class="funky-card p-4 c-gold border-2 border-black">
+            <div class="funky-card p-4 c-gold border-2 border-black bg-[#FFD700]">
                 <p class="text-[9px] font-black uppercase">Current Value</p>
                 <p class="text-lg font-black stat-val">₹${Math.round(totalVal).toLocaleString()}</p>
-                <div class="up-badge mt-1 text-[9px]">+${totalGain}%</div>
+                <div class="up-badge mt-1 text-[9px] font-black">+${totalGain}%</div>
             </div>
         </div>
 
