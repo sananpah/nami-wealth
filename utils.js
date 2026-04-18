@@ -1,6 +1,6 @@
 /* utils.js */
 export const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
-export const BUILD_VERSION = "v1.1.2"; // Updated to match your current build
+export const BUILD_VERSION = "v1.1.3"; // Updated to match your current build
 
 export const emojiMap = {
     "Digital Gold": "🌟", 
