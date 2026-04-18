@@ -11,14 +11,24 @@ window.vaultState = { gold: [] };
 // THE FACTORY: This function handles ANY asset group you add in the future
 function getAssetGroup(data, subCategoryName) {
     return data.filter(item => {
-        const val = String(findValue(item, "Sub-Category") || "").toLowerCase();
-        return val.includes(subCategoryName.toLowerCase());
-    }).map(item => ({
-        name: findValue(item, "Platform") || "Unknown",
-        invested: cleanNum(findValue(item, "Investments")),
-        value: cleanNum(findValue(item, "Portfolio Valuation")),
-        gain: cleanNum(findValue(item, "Profit & Loss %"))
-    }));
+        // We look for ANY key that contains "Sub-Category"
+        const subKey = Object.keys(item).find(k => k.toLowerCase().includes("sub-category"));
+        const val = String(item[subKey] || "").toLowerCase();
+        return val.includes(subCategoryName.toLowerCase().trim());
+    }).map(item => {
+        // We manually find the keys to ensure symbols like (-) don't break it
+        const find = (term) => {
+            const hit = Object.keys(item).find(k => k.toLowerCase().includes(term.toLowerCase()));
+            return item[hit];
+        };
+
+        return {
+            name: find("Platform") || "Unknown",
+            invested: cleanNum(find("Investments")),
+            value: cleanNum(find("Portfolio Valuation")),
+            gain: cleanNum(find("Profit & Loss"))
+        };
+    });
 }
 
 async function fetchNamiData() {
@@ -28,36 +38,39 @@ async function fetchNamiData() {
         const fullData = await response.json();
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
-        
-        // 1. Map Digital Gold
+
+        // 1. Fill the Vault
         window.vaultState.gold = getAssetGroup(dashboardData, "Digital Gold");
 
-        // --- Render Logic ---
+        // 2. Calculate Net Worth with a safety fallback
         let currentTotal = 0;
         let categorySums = {};
 
         dashboardData.forEach(item => {
-            const amt = cleanNum(findValue(item, "Portfolio Valuation"));
+            // Target the Portfolio Valuation column specifically
+            const valKey = Object.keys(item).find(k => k.toLowerCase().includes("portfolio valuation"));
+            const amt = cleanNum(item[valKey]);
+            
             if (amt > 0) {
                 currentTotal += amt;
-                const cat = String(findValue(item, "Category") || "Misc").trim();
+                const catKey = Object.keys(item).find(k => k.toLowerCase().includes("category"));
+                const cat = String(item[catKey] || "Misc").trim();
                 categorySums[cat] = (categorySums[cat] || 0) + amt;
             }
         });
 
+        // 3. Update UI
         document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
         document.getElementById('matrix-container').innerHTML = dashboardData.map((item, index) => renderAssetCard(item, index)).join('');
         
-        // --- CHART LOGIC: This MUST be called here ---
         if (window.Chart) {
             renderCharts(categorySums, snapshotData, currentTotal);
         }
 
         statusEl.innerText = "System Live ⚡";
-        statusEl.style.backgroundColor = "#22c55e"; 
     } catch (error) { 
+        console.error("Connection Error:", error);
         statusEl.innerText = "Sync Failed ❌";
-        console.error("Fetch/Render Error:", error);
     }
 }
 
