@@ -1,5 +1,9 @@
 /* components.js */
-import { emojiMap, findValue } from './utils.js';
+
+// Dynamic import for utils to match the cache-busting version
+const version = window.BUILD_VERSION || "10.6.1";
+const utils = await import(`./utils.js?v=${version}`);
+const { emojiMap, findValue } = utils;
 
 export function renderAssetCard(item, index) {
     const sub = String(findValue(item, "Sub-Category") || "Asset").trim();
