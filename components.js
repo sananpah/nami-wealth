@@ -1,7 +1,7 @@
 /* components.js */
 
 // Standard import - Ensuring we use v1.1.5 to match main.js and bypass cache
-import { emojiMap, findValue, cleanNum } from './utils.js?v=1.1.5';
+import { emojiMap, findValue, cleanNum } from './utils.js?v=1.1.6';
 
 export function renderAssetCard(item, index) {
     const sub = String(findValue(item, "Sub-Category") || "Asset").trim();
