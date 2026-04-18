@@ -15,7 +15,7 @@ function getAssetGroup(data, subCategoryName) {
         name: findValue(item, "Platform") || "Unknown",
         invested: cleanNum(findValue(item, "Investments")),
         value: cleanNum(findValue(item, "Portfolio Valuation")),
-        gain: cleanNum(findValue(item, "Profit & Loss"))
+        gain: cleanNum(findValue(item, "Profit & Loss %") || findValue(item, "Profit & Loss"))
     }));
 }
 
@@ -31,6 +31,9 @@ async function fetchNamiData() {
         // 1. Populate the Vault
         window.vaultState.gold = getAssetGroup(dashboardData, "Digital Gold");
 
+        // Debug check: Open your console (F12) to see if this has 2 items
+        console.log("Vault State Loaded:", window.vaultState.gold);
+        
         // 2. Calculate Live Totals (With Fallback for Headers)
         let currentTotal = 0;
         let categorySums = {};
