@@ -1,6 +1,6 @@
 /* utils.js */
 export const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
-export const BUILD_VERSION = "v10.5.8";
+export const BUILD_VERSION = "v10.6.1"; // Updated to match your current build
 
 export const emojiMap = {
     "Digital Gold": "🌟", 
@@ -14,7 +14,7 @@ export const emojiMap = {
     "Invoice Discounting": "🧾",
     "Stocks + Mutual Funds": "📈",
     "Stocks": "📊",
-    "Mutual Funds": "🌊"
+    "Mutual Funds": "🌊", // Fixed missing comma here
     "ETF": "🧺",
     "Unit Trust": "🏦📊",
     "Robo Portfolio": "🤖",
