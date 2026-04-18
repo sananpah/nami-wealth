@@ -23,9 +23,11 @@ export function renderAssetCard(item, index) {
         </div>`;
 }
 
-export function renderGoldDrilldown(platforms) {
+/* components.js */
+
+export function renderDrilldown(title, platforms) {
     if (!platforms || platforms.length === 0) {
-        return `<div class="p-10 text-center font-black uppercase text-red-500">Error: No Gold Platforms detected in Sheet Data</div>`;
+        return `<div class="p-10 text-center font-black uppercase text-red-500">No data found for ${title}</div>`;
     }
 
     const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
@@ -34,32 +36,32 @@ export function renderGoldDrilldown(platforms) {
 
     return `
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter">Bullion Vault</h2>
+            <h2 class="text-2xl md:text-3xl font-black italic uppercase tracking-tighter">${title} Hub</h2>
             <button onclick="ui.closeDrawer()" class="bg-black text-white px-5 py-2 rounded-full font-black uppercase text-xs">Back</button>
         </div>
         
         <div class="grid grid-cols-2 gap-3 md:gap-4 mb-6">
             <div class="funky-card p-4 bg-white border-2 border-black">
-                <p class="text-[9px] md:text-[10px] font-black uppercase text-slate-400">Investments</p>
-                <p class="text-lg md:text-xl font-black stat-val">₹${Math.round(totalInv).toLocaleString()}</p>
+                <p class="text-[9px] font-black uppercase text-slate-400">Total Invested</p>
+                <p class="text-lg font-black stat-val">₹${Math.round(totalInv).toLocaleString()}</p>
             </div>
             <div class="funky-card p-4 c-gold border-2 border-black">
-                <p class="text-[9px] md:text-[10px] font-black uppercase">Portfolio Valuation</p>
-                <p class="text-lg md:text-xl font-black stat-val">₹${Math.round(totalVal).toLocaleString()}</p>
-                <div class="up-badge mt-1 text-[9px] font-black">+${totalGain}%</div>
+                <p class="text-[9px] font-black uppercase">Current Value</p>
+                <p class="text-lg font-black stat-val">₹${Math.round(totalVal).toLocaleString()}</p>
+                <div class="up-badge mt-1 text-[9px]">+${totalGain}%</div>
             </div>
         </div>
 
-        <div class="space-y-3 md:space-y-4">
+        <div class="space-y-3">
             ${platforms.map(p => `
-                <div class="funky-card p-4 md:p-5 flex justify-between items-center bg-white border-2 border-black">
+                <div class="funky-card p-4 flex justify-between items-center bg-white border-2 border-black">
                     <div>
-                        <p class="font-black italic text-base md:text-lg uppercase tracking-tight truncate">${p.name}</p>
-                        <p class="text-[9px] font-bold text-slate-400 uppercase">GAIN: +${p.gain}%</p>
+                        <p class="font-black italic text-base uppercase">${p.name}</p>
+                        <p class="text-[9px] font-bold text-slate-400 uppercase">P&L: ${p.gain}%</p>
                     </div>
                     <div class="text-right">
-                        <p class="font-black text-lg md:text-xl stat-val">₹${Math.round(p.value).toLocaleString()}</p>
-                        <p class="text-[9px] font-bold opacity-30 uppercase">Invested: ₹${Math.round(p.invested).toLocaleString()}</p>
+                        <p class="font-black text-lg stat-val">₹${Math.round(p.value).toLocaleString()}</p>
+                        <p class="text-[9px] font-bold opacity-30 uppercase">Cost: ₹${Math.round(p.invested).toLocaleString()}</p>
                     </div>
                 </div>
             `).join('')}
