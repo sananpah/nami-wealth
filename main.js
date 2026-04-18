@@ -1,31 +1,25 @@
 /* main.js */
-
-// Dynamic imports to allow cache-busting via the VERSION defined in index.html
-const version = window.BUILD_VERSION || "10.6.2";
-const utils = await import('./utils.js?v=' + version);
-const components = await import('./components.js?v=' + version);
-
-// Mapping the imported functions to match your original code's variable names
-const { SHEET_URL, findValue, cleanNum } = utils;
-const { renderAssetCard, renderGoldDrilldown } = components;
+import { SHEET_URL, findValue, cleanNum } from './utils.js';
+import { renderAssetCard, renderGoldDrilldown } from './components.js';
 
 window.vaultState = { gold: [] };
 
 window.onload = function() {
-    const buildTag = document.getElementById('build-tag');
-    if (buildTag) buildTag.innerText = `BUILD: v${version}`;
+    // The version is handled by index.html now
     fetchNamiData();
 };
 
 async function fetchNamiData() {
     const statusEl = document.getElementById('status-text');
     try {
+        console.log("Fetching data from:", SHEET_URL); // Debug log
         const response = await fetch(SHEET_URL);
         const fullData = await response.json();
+        
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
 
-        // --- Your Exact Sieve Logic ---
+        // Dynamic Sieve for Gold Platforms
         window.vaultState.gold = dashboardData.filter(item => {
             const subCat = String(findValue(item, "Sub-Category") || "").trim();
             return subCat.toLowerCase() === "digital gold";
@@ -49,8 +43,6 @@ async function fetchNamiData() {
         });
 
         document.getElementById('total-networth').innerText = "$" + Math.round(currentTotal).toLocaleString();
-        
-        // --- Your Exact Rendering Logic ---
         document.getElementById('matrix-container').innerHTML = dashboardData.map((item, index) => renderAssetCard(item, index)).join('');
         
         if (window.Chart) {
@@ -59,13 +51,15 @@ async function fetchNamiData() {
         
         statusEl.innerText = "System Live ⚡";
         statusEl.style.backgroundColor = "#22c55e"; 
+        console.log("Terminal Fully Loaded"); // Debug log
+
     } catch (error) { 
         statusEl.innerText = "Sync Failed ❌";
-        console.error(error);
+        console.error("Data Load Error:", error);
     }
 }
 
-// --- Your Exact UI Controller ---
+// Global UI Controller
 window.ui = {
     openDrilldown: (sub) => {
         const drawer = document.getElementById('detail-drawer');
