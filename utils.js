@@ -30,8 +30,14 @@ export function findValue(obj, targetKey) {
     const normalize = (s) => String(s).toLowerCase().replace(/[^a-z0-9]/g, '');
     const search = normalize(targetKey);
     
-    // Look for any key in the object that contains our search word
-    const actualKey = Object.keys(obj).find(k => normalize(k).includes(search));
+    // 1. Try to find an EXACT match first (Safest)
+    let actualKey = Object.keys(obj).find(k => normalize(k) === search);
+    
+    // 2. If no exact match, fallback to the 'includes' logic (Flexible)
+    if (!actualKey) {
+        actualKey = Object.keys(obj).find(k => normalize(k).includes(search));
+    }
+    
     return actualKey ? obj[actualKey] : null;
 }
 
