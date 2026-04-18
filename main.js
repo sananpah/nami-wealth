@@ -27,12 +27,13 @@ async function fetchNamiData() {
         
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
+        const othersData = fullData.others || [];
         
         // 1. Populate the Vault
-        window.vaultState.gold = getAssetGroup(dashboardData, "Digital Gold");
+        window.vaultState.gold = getAssetGroup(othersData, "Digital Gold");
 
         // Debug check: Open your console (F12) to see if this has 2 items
-        console.log("Vault State Loaded:", window.vaultState.gold);
+        console.log("Vault State Loaded from Others Tab:", window.vaultState.gold);
         
         // 2. Calculate Live Totals (With Fallback for Headers)
         let currentTotal = 0;
