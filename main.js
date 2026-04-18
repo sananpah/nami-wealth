@@ -27,6 +27,7 @@ async function fetchNamiData() {
         const response = await fetch(SHEET_URL);
         const fullData = await response.json();
         const dashboardData = fullData.dashboard || [];
+        const snapshotData = fullData.snapshot || []; // Ensure we grab the snapshot tab
         
         // 1. Populate the Vault
         window.vaultState.gold = getAssetGroup(dashboardData, "Digital Gold");
@@ -56,9 +57,14 @@ async function fetchNamiData() {
             .map((item, index) => renderAssetCard(item, index))
             .join('');
 
-        // ... (Charts logic) ...
+        // 5. FIX: Call the Chart logic here
+        if (window.Chart) {
+            renderCharts(categorySums, snapshotData, currentTotal);
+        }
+
         statusEl.innerText = "System Live ⚡";
     } catch (error) {
+        console.error("Fetch Error:", error);
         statusEl.innerText = "Sync Failed ❌";
     }
 }
