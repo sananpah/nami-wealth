@@ -1,18 +1,18 @@
 /* components.js */
 
-// Standard import is more reliable for Edge/Brave than top-level await imports
-import { emojiMap, findValue, cleanNum } from './utils.js?v=1.1.4';
+// Standard import - Ensuring we use v1.1.5 to match main.js and bypass cache
+import { emojiMap, findValue, cleanNum } from './utils.js?v=1.1.5';
 
 export function renderAssetCard(item, index) {
     const sub = String(findValue(item, "Sub-Category") || "Asset").trim();
     
-    // FIX: Instead of item.amount, we use findValue to target "Portfolio Valuation"
-    const rawAmt = findValue(item, "Portfolio Valuation");
+    // DEFENSIVE FIX: Try "Portfolio Valuation", fallback to "Amount" if valuation is missing
+    const rawAmt = findValue(item, "Portfolio Valuation") || findValue(item, "Amount");
     const amt = cleanNum(rawAmt);
     
     const cat = String(findValue(item, "Category") || "Misc").trim();
     
-    // Maintain your dynamic coloring
+    // Dynamic styling
     let colorClass = "c-" + (((index % 11) + 1).toString().padStart(2, '0'));
     if (sub === "Digital Gold") colorClass = "c-gold";
 
@@ -31,7 +31,7 @@ export function renderDrilldown(title, platforms) {
         return `<div class="p-10 text-center font-black uppercase text-red-500">No Data found for ${title}</div>`;
     }
 
-    // Safety: Ensure values are treated as numbers during reduction
+    // Safety: Explicitly cast to Number to ensure reduction doesn't fail on strings
     const totalInv = platforms.reduce((acc, p) => acc + (Number(p.invested) || 0), 0);
     const totalVal = platforms.reduce((acc, p) => acc + (Number(p.value) || 0), 0);
 
@@ -57,7 +57,7 @@ export function renderDrilldown(title, platforms) {
                         <p class="font-black uppercase">${p.name}</p>
                         <p class="text-[10px] opacity-50 font-bold uppercase">Gain: ${p.gain}%</p>
                     </div>
-                    <p class="font-black stat-val">₹${Math.round(p.value).toLocaleString()}</p>
+                    <p class="font-black stat-val text-right">₹${Math.round(p.value).toLocaleString()}</p>
                 </div>
             `).join('')}
         </div>`;
