@@ -1,6 +1,10 @@
 /* main.js */
-import { SHEET_URL, findValue, cleanNum } from './utils.js';
-import { renderAssetCard, renderGoldDrilldown } from './components.js';
+
+// Use absolute relative path for Edge consistency
+import { SHEET_URL, findValue, cleanNum } from './utils.js?v=10.6.4';
+import { renderAssetCard, renderGoldDrilldown } from './components.js?v=10.6.4';
+
+console.log(">>> ENGINE START: Edge has cleared the imports!");
 
 window.vaultState = { gold: [] };
 
