@@ -70,7 +70,8 @@ window.ui = {
         const subLower = sub.toLowerCase().trim();
         
         if (subLower === "digital gold") {
-            content.innerHTML = renderDrilldown(window.vaultState.gold);
+            // FIX: Pass BOTH the Title string AND the Data array
+            content.innerHTML = renderDrilldown("Bullion Vault", window.vaultState.gold);
         } 
 
         drawer.classList.remove('opacity-0', 'pointer-events-none');
