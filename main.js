@@ -104,12 +104,32 @@ async function fetchNamiData() {
 // Global UI Controller
 window.ui = {
     openDrilldown: (sub) => {
+        const drawer = document.getElementById('detail-drawer');
         const content = document.getElementById('drawer-content');
-        const subLower = sub.toLowerCase().trim();
+        
+        // Normalize the name to check against our fixed data
+        const subLower = String(sub || "").toLowerCase().trim();
+        
         if (subLower === "digital gold") {
+            // Show the actual vault data
             content.innerHTML = renderDrilldown("Bullion Vault", window.vaultState.gold);
-        } 
-        document.getElementById('detail-drawer').classList.remove('opacity-0', 'pointer-events-none');
+        } else {
+            // Show "Coming Soon" for everything else (Equity, etc.)
+            content.innerHTML = `
+                <div class="flex flex-col items-center justify-center py-16 text-center">
+                    <div class="text-6xl mb-4 animate-bounce">🚀</div>
+                    <h2 class="text-2xl font-black uppercase italic nami-header">${sub}</h2>
+                    <p class="text-sm font-black opacity-40 uppercase tracking-widest mt-2">Analysis Coming Soon</p>
+                    <button onclick="ui.closeDrawer()" 
+                            class="mt-8 bg-black text-white px-8 py-3 rounded-full font-black uppercase text-xs shadow-[4px_4px_0px_#FF00FF]">
+                        Go Back
+                    </button>
+                </div>
+            `;
+        }
+
+        // Open Drawer
+        drawer.classList.remove('opacity-0', 'pointer-events-none');
         content.style.transform = "translateY(0)";
     },
     closeDrawer: () => {
