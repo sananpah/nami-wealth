@@ -26,10 +26,20 @@ export function renderAssetCard(item, index) {
         </div>`;
 }
 
+/* components.js */
+
 export function renderDrilldown(title, platforms) {
     if (!platforms || platforms.length === 0) {
         return `<div class="p-10 text-center font-black uppercase text-red-500">No Data found</div>`;
     }
+
+    // 1. Calculate totals
+    const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
+    const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
+    
+    // 2. Determine display currency (Checking the first item as a reference)
+    const displaySymbol = platforms[0].currencySymbol || "$";
+    const currencyLabel = displaySymbol === "₹" ? "INR" : "SGD";
 
     return `
         <div class="flex justify-between items-center mb-6">
@@ -37,35 +47,46 @@ export function renderDrilldown(title, platforms) {
             <button onclick="ui.closeDrawer()" class="bg-black text-white px-4 py-2 rounded-full text-xs font-black uppercase">Back</button>
         </div>
 
+        <div class="grid grid-cols-2 gap-4 mb-6">
+            <div class="p-4 bg-white border-2 border-black">
+                <p class="text-[9px] font-black uppercase opacity-40">Total Invested (${currencyLabel})</p>
+                <p class="text-lg font-black stat-val">${displaySymbol}${Math.round(totalInv).toLocaleString()}</p>
+            </div>
+            <div class="p-4 bg-[#FFD700] border-2 border-black shadow-[4px_4px_0px_#000]">
+                <p class="text-[9px] font-black uppercase">Current Value (${currencyLabel})</p>
+                <p class="text-lg font-black stat-val">${displaySymbol}${Math.round(totalVal).toLocaleString()}</p>
+            </div>
+        </div>
+
         <div class="space-y-3">
             ${platforms.map(p => {
-                // Change #2: Fixed Logo path logic
-                const platformName = p.name.trim();
-                const logoPath = `logo/logo_${platformName}.png`; 
+                // Fix for Logo: logo_Ultra.png (Ensure no leading/trailing spaces)
+                const cleanName = p.name.trim();
+                const logoUrl = `logo/logo_${cleanName}.png`; 
                 
                 return `
                 <div class="p-4 flex justify-between items-center bg-white border-2 border-black shadow-[4px_4px_0px_#000]">
                     <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 flex items-center justify-center bg-gray-100 border border-black overflow-hidden">
-                            <img src="${logoPath}" 
+                        <div class="w-12 h-12 border-2 border-black bg-gray-50 flex items-center justify-center overflow-hidden">
+                            <img src="${logoUrl}" 
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
-                                 class="w-full h-full object-contain" 
-                                 alt="${platformName}">
-                            <span class="hidden font-black text-[10px] uppercase text-center">${platformName}</span>
+                                 class="w-full h-full object-contain p-1" 
+                                 alt="${cleanName}">
+                            <span class="hidden font-black text-[10px] text-center px-1">${cleanName}</span>
                         </div>
                         
                         <div>
-                            <p class="font-black text-xs uppercase mb-1">${platformName}</p>
+                            <p class="font-black text-xs uppercase mb-1">${cleanName}</p>
                             <div class="flex gap-2">
-                                <span class="text-[9px] font-black bg-green-100 px-1 border border-black">ABS: ${p.absGain}%</span>
-                                <span class="text-[9px] font-black bg-blue-100 px-1 border border-black">XIRR: ${p.xirr}%</span>
+                                <span class="text-[9px] font-black bg-[#39FF14] px-1 border border-black">ABS: ${p.absGain}%</span>
+                                <span class="text-[9px] font-black bg-[#00FFFF] px-1 border border-black">XIRR: ${p.xirr}%</span>
                             </div>
                         </div>
                     </div>
                     
                     <div class="text-right">
-                        <p class="text-[8px] font-black opacity-40 uppercase">Current Value</p>
-                        <p class="font-black stat-val text-xl">${p.currency}${Math.round(p.value).toLocaleString()}</p>
+                        <p class="text-[8px] font-black opacity-40 uppercase">Valuation</p>
+                        <p class="font-black stat-val text-xl">${p.currencySymbol}${Math.round(p.value).toLocaleString()}</p>
                     </div>
                 </div>
             `}).join('')}
