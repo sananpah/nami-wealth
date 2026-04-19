@@ -73,7 +73,7 @@ body {
 .asset-label { 
     font-size: 8px; 
     font-weight: 900; 
-    text-transform: uppercase; 
+    text-transform: none; 
     background: #000; 
     color: #fff; 
     padding: 2px 6px; 
