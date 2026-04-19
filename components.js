@@ -78,11 +78,11 @@ export function renderDrilldown(title, platforms) {
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
                                  class="w-full h-full object-contain" 
                                  alt="${cleanName}">
-                            <span class="hidden font-black text-[8px] uppercase text-center leading-none">${cleanName}</span>
+                            <span class="hidden font-black text-[8px] text-center leading-none">${cleanName}</span>
                         </div>
                         
                         <div class="min-w-0">
-                            <p class="font-black text-xs md:text-base uppercase truncate">${cleanName}</p>
+                            <p class="font-black text-xs md:text-base truncate">${cleanName}</p>
                             <div class="flex gap-1 mt-1">
                                 <span class="text-[8px] font-black bg-[#39FF14] px-1 border border-black">ABS:${Math.round(p.absGain)}%</span>
                                 <span class="text-[8px] font-black bg-[#00FFFF] px-1 border border-black">XIRR:${Math.round(p.xirr)}%</span>
@@ -91,7 +91,7 @@ export function renderDrilldown(title, platforms) {
                     </div>
                     
                     <div class="ml-auto text-right">
-                        <p class="text-[7px] md:text-[9px] font-black opacity-30 uppercase leading-none">Valuation</p>
+                        <p class="text-[7px] md:text-[9px] font-black opacity-30 leading-none">Valuation</p>
                         <p class="font-black stat-val text-lg md:text-2xl">${p.currencySymbol}${Math.round(p.value).toLocaleString()}</p>
                     </div>
 
