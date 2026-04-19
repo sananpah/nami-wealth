@@ -9,7 +9,9 @@ const SGD_TO_INR = 72.88; // Current Rate: 1 SGD ≈ 72.88 INR
 
 window.vaultState = { gold: [] };
 
+/* main.js snippet */
 function getAssetGroup(data, subCategoryName) {
+    const SGD_TO_INR = 72.88; // Ensure this is current
     const today = new Date();
     const startOfYear = new Date(today.getFullYear(), 0, 1);
     const diffDays = Math.ceil((today - startOfYear) / (1000 * 60 * 60 * 24));
@@ -18,25 +20,26 @@ function getAssetGroup(data, subCategoryName) {
         const val = String(findValue(item, "Sub-Category") || "").toLowerCase().trim();
         return val.includes(subCategoryName.toLowerCase().trim());
     }).map(item => {
-        const currency = String(findValue(item, "Currency") || "SGD").toUpperCase();
-        const isINR = currency === "INR";
+        const platformName = String(findValue(item, "Platform") || "Unknown").trim();
+        const currencyAttr = String(findValue(item, "Currency") || "SGD").toUpperCase();
         
-        const rawInvested = cleanNum(findValue(item, "Investments"));
-        const rawValue = cleanNum(findValue(item, "Portfolio Valuation"));
+        const rawInv = cleanNum(findValue(item, "Investments"));
+        const rawVal = cleanNum(findValue(item, "Portfolio Valuation"));
 
-        // Conversion Logic: Excel has SGD, website shows INR for "INR" rows
-        const displayInvested = isINR ? rawInvested * SGD_TO_INR : rawInvested;
-        const displayValue = isINR ? rawValue * SGD_TO_INR : rawValue;
+        // Force "INR" if the sheet says so, otherwise default to "SGD"
+        const isINR = currencyAttr === "INR";
+        const displayInv = isINR ? rawInv * SGD_TO_INR : rawInv;
+        const displayVal = isINR ? rawVal * SGD_TO_INR : rawVal;
 
-        // Change #3: Manual Gain Logic (Using raw SGD values for calculation)
-        const absGain = rawInvested > 0 ? ((rawValue - rawInvested) / rawInvested) * 100 : 0;
+        const absGain = rawInv > 0 ? ((rawVal - rawInv) / rawInv) * 100 : 0;
         const xirr = diffDays > 0 ? (absGain / diffDays) * 365 : 0;
 
         return {
-            name: findValue(item, "Platform") || "Unknown",
-            currency: isINR ? "₹" : "$",
-            invested: displayInvested,
-            value: displayValue,
+            name: platformName,
+            // CRITICAL: Ensure this is always defined as a string
+            currencySymbol: isINR ? "₹" : "$", 
+            invested: displayInv,
+            value: displayVal,
             absGain: absGain.toFixed(2),
             xirr: xirr.toFixed(2)
         };
