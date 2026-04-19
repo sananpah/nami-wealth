@@ -57,9 +57,7 @@ async function fetchNamiData() {
         
         // 1. Populate the Vault
         window.vaultState.gold = getAssetGroup(othersData, "Digital Gold");
-
-        // Debug check: Open your console (F12) to see if this has 2 items
-        console.log("Vault State Loaded from Others Tab:", window.vaultState.gold);
+        window.vaultState.bonds = getAssetGroup(othersData, "Bonds");
         
         // 2. Calculate Live Totals (With Fallback for Headers)
         let currentTotal = 0;
@@ -113,6 +111,10 @@ window.ui = {
         if (subLower === "digital gold") {
             // Show the actual vault data
             content.innerHTML = renderDrilldown("Bullion Vault", window.vaultState.gold);
+        }    
+        else if (subLower === "bonds") {
+            // We reuse the same renderDrilldown function
+            content.innerHTML = renderDrilldown("Bond Portfolio", window.vaultState.bonds);
         } else {
             // Show "Coming Soon" for everything else (Equity, etc.)
             content.innerHTML = `
