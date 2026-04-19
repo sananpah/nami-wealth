@@ -31,42 +31,41 @@ export function renderDrilldown(title, platforms) {
         return `<div class="p-10 text-center font-black uppercase text-red-500">No Data found</div>`;
     }
 
-    const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
-    const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
-
     return `
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-2xl font-black italic uppercase">${title}</h2>
             <button onclick="ui.closeDrawer()" class="bg-black text-white px-4 py-2 rounded-full text-xs font-black uppercase">Back</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-6">
-            <div class="p-4 bg-white border-2 border-black">
-                <p class="text-[9px] font-black uppercase opacity-40">Total Invested (SGD)</p>
-                <p class="text-lg font-black stat-val">$${Math.round(totalInv).toLocaleString()}</p>
-            </div>
-            <div class="p-4 bg-[#FFD700] border-2 border-black shadow-[4px_4px_0px_#000]">
-                <p class="text-[9px] font-black uppercase">Current Value (SGD)</p>
-                <p class="text-lg font-black stat-val">$${Math.round(totalVal).toLocaleString()}</p>
-            </div>
-        </div>
-
         <div class="space-y-3">
             ${platforms.map(p => {
-                // Change #2: Logo logic (logo_PlatformName.png)
-                const logoUrl = `./logos/logo_${p.name.trim()}.png`; 
+                // Change #2: Fixed Logo path logic
+                const platformName = p.name.trim();
+                const logoPath = `logo/logo_${platformName}.png`; 
                 
                 return `
-                <div class="p-4 flex justify-between items-center bg-white border-2 border-black hover:bg-gray-50 transition-colors">
+                <div class="p-4 flex justify-between items-center bg-white border-2 border-black shadow-[4px_4px_0px_#000]">
                     <div class="flex items-center gap-4">
-                        <img src="${logoUrl}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" class="w-10 h-10 object-contain" alt="${p.name}">
-                        <p class="font-black uppercase hidden">${p.name}</p> <div>
-                            <p class="text-[10px] font-bold uppercase text-green-600">ABS: ${p.absGain}%</p>
-                            <p class="text-[10px] font-bold uppercase text-blue-600">XIRR: ${p.xirr}%</p>
+                        <div class="w-12 h-12 flex items-center justify-center bg-gray-100 border border-black overflow-hidden">
+                            <img src="${logoPath}" 
+                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
+                                 class="w-full h-full object-contain" 
+                                 alt="${platformName}">
+                            <span class="hidden font-black text-[10px] uppercase text-center">${platformName}</span>
+                        </div>
+                        
+                        <div>
+                            <p class="font-black text-xs uppercase mb-1">${platformName}</p>
+                            <div class="flex gap-2">
+                                <span class="text-[9px] font-black bg-green-100 px-1 border border-black">ABS: ${p.absGain}%</span>
+                                <span class="text-[9px] font-black bg-blue-100 px-1 border border-black">XIRR: ${p.xirr}%</span>
+                            </div>
                         </div>
                     </div>
+                    
                     <div class="text-right">
-                        <p class="font-black stat-val text-xl">$${Math.round(p.value).toLocaleString()}</p>
+                        <p class="text-[8px] font-black opacity-40 uppercase">Current Value</p>
+                        <p class="font-black stat-val text-xl">${p.currency}${Math.round(p.value).toLocaleString()}</p>
                     </div>
                 </div>
             `}).join('')}
