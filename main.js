@@ -1,17 +1,11 @@
 /* main.js */
 
-import { SHEET_URL, findValue, cleanNum } from './utils.js?v=1.1.8';
+import { SHEET_URL, findValue, cleanNum, EXCHANGE_RATES, CURRENCY_SYMBOLS, getCorrectCasing, getCurrencySymbol } from './utils.js?v=1.1.9';
 import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.9';
-
-console.log(">>> ENGINE START: Logic v1.1.6 Activated");
-
-const SGD_TO_INR = 72.88; // Current Rate: 1 SGD ≈ 72.88 INR
 
 window.vaultState = { gold: [] };
 
-/* main.js snippet */
 function getAssetGroup(data, subCategoryName) {
-    const SGD_TO_INR = 72.88; // Ensure this is current
     const today = new Date();
     const startOfYear = new Date(today.getFullYear(), 0, 1);
     const diffDays = Math.ceil((today - startOfYear) / (1000 * 60 * 60 * 24));
@@ -20,24 +14,29 @@ function getAssetGroup(data, subCategoryName) {
         const val = String(findValue(item, "Sub-Category") || "").toLowerCase().trim();
         return val.includes(subCategoryName.toLowerCase().trim());
     }).map(item => {
-        const platformName = String(findValue(item, "Platform") || "Unknown").trim();
+        const rawName = String(findValue(item, "Platform") || "Unknown");
         const currencyAttr = String(findValue(item, "Currency") || "SGD").toUpperCase();
         
+        // 1. Get correct casing for name and logo matching
+        const platformName = getCorrectCasing(rawName);
+        
+        // 2. Lookup Rate and Symbol from utils
+        const rate = EXCHANGE_RATES[currencyAttr] || 1.0;
+        const symbol = getCurrencySymbol(currencyAttr);
+
         const rawInv = cleanNum(findValue(item, "Investments"));
         const rawVal = cleanNum(findValue(item, "Portfolio Valuation"));
 
-        // Force "INR" if the sheet says so, otherwise default to "SGD"
-        const isINR = currencyAttr === "INR";
-        const displayInv = isINR ? rawInv * SGD_TO_INR : rawInv;
-        const displayVal = isINR ? rawVal * SGD_TO_INR : rawVal;
+        // 3. Convert display values
+        const displayInv = rawInv * rate;
+        const displayVal = rawVal * rate;
 
         const absGain = rawInv > 0 ? ((rawVal - rawInv) / rawInv) * 100 : 0;
         const xirr = diffDays > 0 ? (absGain / diffDays) * 365 : 0;
 
         return {
             name: platformName,
-            // CRITICAL: Ensure this is always defined as a string
-            currencySymbol: isINR ? "₹" : "$", 
+            currencySymbol: symbol, 
             invested: displayInv,
             value: displayVal,
             absGain: absGain.toFixed(2),
