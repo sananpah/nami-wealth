@@ -1,31 +1,35 @@
 /* components.js */
 
-import { emojiMap, findValue, cleanNum } from './utils.js?v=1.1.6';
+import { emojiMap, findValue, cleanNum, getCorrectCasing } from './utils.js?v=1.1.7';
 
 export function renderAssetCard(item, index) {
-    const sub = String(findValue(item, "Sub-Category") || "Asset").trim();
+    // 1. Get raw values and fix casing immediately
+    const rawSub = String(findValue(item, "Sub-Category") || "Asset").trim();
+    const sub = getCorrectCasing(rawSub); 
     
-    // DEFENSIVE FIX: Try "Portfolio Valuation", fallback to "Amount" if valuation is missing
+    const rawCat = String(findValue(item, "Category") || "Misc").trim();
+    const cat = getCorrectCasing(rawCat); // Optional: if you want Category to match emojiMap casing too
+    
     const rawAmt = findValue(item, "Portfolio Valuation") || findValue(item, "Amount");
     const amt = cleanNum(rawAmt);
     
-    const cat = String(findValue(item, "Category") || "Misc").trim();
-    
-    // Dynamic styling
+    // 2. Dynamic styling
     let colorClass = "c-" + (((index % 11) + 1).toString().padStart(2, '0'));
     if (sub === "Digital Gold") colorClass = "c-gold";
 
     return `
         <div class="funky-card p-4 md:p-6 ${colorClass} cursor-pointer active:scale-95 transition-transform" 
              onclick="ui.openDrilldown('${sub}')">
+            
             <span class="card-emoji text-2xl absolute top-2 right-4">${emojiMap[sub] || "💰"}</span>
-            <div class="asset-label bg-black text-white text-[8px] px-2 py-1 rounded inline-block uppercase font-black mb-1 truncate max-w-[85%]">${cat}</div>
-            <div class="font-black text-[10px] uppercase opacity-70 tracking-tighter truncate">${sub}</div>
+            
+            <div class="asset-label bg-black text-white text-[8px] px-2 py-1 rounded inline-block font-black mb-1 truncate max-w-[85%]">${cat}</div>
+            
+            <div class="font-black text-[10px] opacity-70 tracking-tighter truncate">${sub}</div>
+            
             <div class="text-xl md:text-3xl stat-val mt-1">$${Math.round(amt).toLocaleString()}</div>
         </div>`;
 }
-
-/* components.js */
 
 export function renderDrilldown(title, platforms) {
     if (!platforms || platforms.length === 0) return `<div class="p-10 text-center font-black">No Data</div>`;
