@@ -28,37 +28,47 @@ export function renderAssetCard(item, index) {
 
 export function renderDrilldown(title, platforms) {
     if (!platforms || platforms.length === 0) {
-        return `<div class="p-10 text-center font-black uppercase text-red-500">No Data found for ${title}</div>`;
+        return `<div class="p-10 text-center font-black uppercase text-red-500">No Data found</div>`;
     }
 
-    // Safety: Explicitly cast to Number to ensure reduction doesn't fail on strings
-    const totalInv = platforms.reduce((acc, p) => acc + (Number(p.invested) || 0), 0);
-    const totalVal = platforms.reduce((acc, p) => acc + (Number(p.value) || 0), 0);
+    const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
+    const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
 
     return `
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-black italic uppercase italic">${title}</h2>
+            <h2 class="text-2xl font-black italic uppercase">${title}</h2>
             <button onclick="ui.closeDrawer()" class="bg-black text-white px-4 py-2 rounded-full text-xs font-black uppercase">Back</button>
         </div>
+
         <div class="grid grid-cols-2 gap-4 mb-6">
             <div class="p-4 bg-white border-2 border-black">
-                <p class="text-[9px] font-black uppercase opacity-40">Invested</p>
-                <p class="text-lg font-black stat-val">₹${Math.round(totalInv).toLocaleString()}</p>
+                <p class="text-[9px] font-black uppercase opacity-40">Total Invested (SGD)</p>
+                <p class="text-lg font-black stat-val">$${Math.round(totalInv).toLocaleString()}</p>
             </div>
-            <div class="p-4 bg-[#FFD700] border-2 border-black">
-                <p class="text-[9px] font-black uppercase">Current Value</p>
-                <p class="text-lg font-black stat-val">₹${Math.round(totalVal).toLocaleString()}</p>
+            <div class="p-4 bg-[#FFD700] border-2 border-black shadow-[4px_4px_0px_#000]">
+                <p class="text-[9px] font-black uppercase">Current Value (SGD)</p>
+                <p class="text-lg font-black stat-val">$${Math.round(totalVal).toLocaleString()}</p>
             </div>
         </div>
+
         <div class="space-y-3">
-            ${platforms.map(p => `
-                <div class="p-4 flex justify-between items-center bg-white border-2 border-black">
-                    <div>
-                        <p class="font-black uppercase">${p.name}</p>
-                        <p class="text-[10px] opacity-50 font-bold uppercase">Gain: ${p.gain}%</p>
+            ${platforms.map(p => {
+                // Change #2: Logo logic (logo_PlatformName.png)
+                const logoUrl = `./logos/logo_${p.name.trim()}.png`; 
+                
+                return `
+                <div class="p-4 flex justify-between items-center bg-white border-2 border-black hover:bg-gray-50 transition-colors">
+                    <div class="flex items-center gap-4">
+                        <img src="${logoUrl}" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" class="w-10 h-10 object-contain" alt="${p.name}">
+                        <p class="font-black uppercase hidden">${p.name}</p> <div>
+                            <p class="text-[10px] font-bold uppercase text-green-600">ABS: ${p.absGain}%</p>
+                            <p class="text-[10px] font-bold uppercase text-blue-600">XIRR: ${p.xirr}%</p>
+                        </div>
                     </div>
-                    <p class="font-black stat-val text-right">₹${Math.round(p.value).toLocaleString()}</p>
+                    <div class="text-right">
+                        <p class="font-black stat-val text-xl">$${Math.round(p.value).toLocaleString()}</p>
+                    </div>
                 </div>
-            `).join('')}
+            `}).join('')}
         </div>`;
 }
