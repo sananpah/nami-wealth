@@ -14,20 +14,16 @@ function getAssetGroup(data, subCategoryName) {
         const val = String(findValue(item, "Sub-Category") || "").toLowerCase().trim();
         return val.includes(subCategoryName.toLowerCase().trim());
     }).map(item => {
-        const rawName = String(findValue(item, "Platform") || "Unknown");
+        const platformName = String(findValue(item, "Platform") || "Unknown");
         const currencyAttr = String(findValue(item, "Currency") || "SGD").toUpperCase();
-        
-        // 1. Get correct casing for name and logo matching
-        const platformName = getCorrectCasing(rawName);
-        
-        // 2. Lookup Rate and Symbol from utils
+
         const rate = EXCHANGE_RATES[currencyAttr] || 1.0;
         const symbol = getCurrencySymbol(currencyAttr);
 
         const rawInv = cleanNum(findValue(item, "Investments"));
         const rawVal = cleanNum(findValue(item, "Portfolio Valuation"));
 
-        // 3. Convert display values
+        //Convert display values
         const displayInv = rawInv * rate;
         const displayVal = rawVal * rate;
 
