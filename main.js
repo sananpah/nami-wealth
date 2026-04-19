@@ -5,18 +5,46 @@ import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.6';
 
 console.log(">>> ENGINE START: Logic v1.1.6 Activated");
 
+const INR_TO_SGD = 1 / 63; // 1 SGD ≈ 63 INR
+
 window.vaultState = { gold: [] };
 
 function getAssetGroup(data, subCategoryName) {
+    const today = new Date();
+    const startOfYear = new Date(today.getFullYear(), 0, 1);
+    const diffDays = Math.ceil((today - startOfYear) / (1000 * 60 * 60 * 24));
+
     return data.filter(item => {
-        const val = String(findValue(item, "Sub-Category") || "").toLowerCase();
+        const val = String(findValue(item, "Sub-Category") || "").toLowerCase().trim();
         return val.includes(subCategoryName.toLowerCase().trim());
-    }).map(item => ({
-        name: findValue(item, "Platform") || "Unknown",
-        invested: cleanNum(findValue(item, "Investments")),
-        value: cleanNum(findValue(item, "Portfolio Valuation")),
-        gain: cleanNum(findValue(item, "Profit & Loss %") || findValue(item, "Profit & Loss"))
-    }));
+    }).map(item => {
+        const currency = String(findValue(item, "Currency") || "SGD").toUpperCase();
+        const isINR = currency === "INR";
+        
+        let invested = cleanNum(findValue(item, "Investments"));
+        let value = cleanNum(findValue(item, "Portfolio Valuation"));
+
+        // Change #1: Convert INR to SGD
+        if (isINR) {
+            invested = invested * INR_TO_SGD;
+            value = value * INR_TO_SGD;
+        }
+
+        // Change #3: Gain Calculations
+        // Absolute % = ((Value - Invested) / Invested) * 100
+        const absGain = invested > 0 ? ((value - invested) / invested) * 100 : 0;
+        
+        // Simple Projected XIRR: (Absolute Gain / Days Elapsed) * 365
+        const xirr = diffDays > 0 ? (absGain / diffDays) * 365 : 0;
+
+        return {
+            name: findValue(item, "Platform") || "Unknown",
+            invested: invested,
+            value: value,
+            absGain: absGain.toFixed(2),
+            xirr: xirr.toFixed(2)
+        };
+    });
 }
 
 async function fetchNamiData() {
