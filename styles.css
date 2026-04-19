@@ -82,6 +82,23 @@ body {
     margin-bottom: 2px; 
 }
 
+#detail-drawer {
+    padding: 0 10px; /* Gives a tiny bit of space from the phone edge */
+}
+
+#drawer-content {
+    width: 100%;
+    max-width: 600px; /* Prevents it from getting too wide on desktop */
+    margin: 0 auto;
+    border-radius: 20px 20px 0 0;
+    padding: 20px 15px; /* Comfortable spacing inside */
+}
+
+img {
+    max-width: 100%;
+    height: auto;
+}
+
 .c-gold { background: #FFD700 !important; color: #000; }                
 .c-01 { background: #FF00FF !important; color: #fff; } 
 .c-02 { background: #FF3131 !important; color: #fff; } 
