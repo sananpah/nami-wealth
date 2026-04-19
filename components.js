@@ -17,18 +17,24 @@ export function renderAssetCard(item, index) {
     let colorClass = "c-" + (((index % 11) + 1).toString().padStart(2, '0'));
     if (sub === "Digital Gold") colorClass = "c-gold";
 
-    return `
-        <div class="funky-card p-4 md:p-6 ${colorClass} cursor-pointer active:scale-95 transition-transform" 
-             onclick="ui.openDrilldown('${sub}')">
-            
-            <span class="card-emoji text-2xl absolute top-2 right-4">${emojiMap[sub] || "💰"}</span>
-            
-            <div class="asset-label bg-black text-white text-[8px] px-2 py-1 rounded inline-block font-black mb-1 truncate max-w-[85%]">${cat}</div>
-            
-            <div class="font-black text-[10px] opacity-70 tracking-tighter truncate">${sub}</div>
-            
-            <div class="text-xl md:text-3xl stat-val mt-1">$${Math.round(amt).toLocaleString()}</div>
-        </div>`;
+/* components.js */
+
+return `
+    <div class="funky-card p-4 md:p-6 ${colorClass} cursor-pointer active:scale-95 transition-transform" 
+         onclick="ui.openDrilldown('${sub}')">
+        
+        <span class="card-emoji text-2xl absolute top-2 right-4">${emojiMap[sub] || "💰"}</span>
+        
+        <div class="asset-label bg-black text-white text-[10px] px-2 py-1 rounded inline-block font-black mb-2 truncate max-w-[85%] border border-white/20">
+            ${cat}
+        </div>
+        
+        <div class="font-black text-[13px] opacity-80 tracking-tight truncate leading-tight">
+            ${sub}
+        </div>
+        
+        <div class="text-2xl md:text-3xl stat-val mt-2">$${Math.round(amt).toLocaleString()}</div>
+    </div>`;
 }
 
 export function renderDrilldown(title, platforms) {
