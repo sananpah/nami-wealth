@@ -5,7 +5,7 @@ import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.6';
 
 console.log(">>> ENGINE START: Logic v1.1.6 Activated");
 
-const INR_TO_SGD = 1 / 63; // 1 SGD ≈ 63 INR
+const SGD_TO_INR = 72.88; // Current Rate: 1 SGD ≈ 72.88 INR
 
 window.vaultState = { gold: [] };
 
@@ -21,26 +21,22 @@ function getAssetGroup(data, subCategoryName) {
         const currency = String(findValue(item, "Currency") || "SGD").toUpperCase();
         const isINR = currency === "INR";
         
-        let invested = cleanNum(findValue(item, "Investments"));
-        let value = cleanNum(findValue(item, "Portfolio Valuation"));
+        const rawInvested = cleanNum(findValue(item, "Investments"));
+        const rawValue = cleanNum(findValue(item, "Portfolio Valuation"));
 
-        // Change #1: Convert INR to SGD
-        if (isINR) {
-            invested = invested * INR_TO_SGD;
-            value = value * INR_TO_SGD;
-        }
+        // Conversion Logic: Excel has SGD, website shows INR for "INR" rows
+        const displayInvested = isINR ? rawInvested * SGD_TO_INR : rawInvested;
+        const displayValue = isINR ? rawValue * SGD_TO_INR : rawValue;
 
-        // Change #3: Gain Calculations
-        // Absolute % = ((Value - Invested) / Invested) * 100
-        const absGain = invested > 0 ? ((value - invested) / invested) * 100 : 0;
-        
-        // Simple Projected XIRR: (Absolute Gain / Days Elapsed) * 365
+        // Change #3: Manual Gain Logic (Using raw SGD values for calculation)
+        const absGain = rawInvested > 0 ? ((rawValue - rawInvested) / rawInvested) * 100 : 0;
         const xirr = diffDays > 0 ? (absGain / diffDays) * 365 : 0;
 
         return {
             name: findValue(item, "Platform") || "Unknown",
-            invested: invested,
-            value: value,
+            currency: isINR ? "₹" : "$",
+            invested: displayInvested,
+            value: displayValue,
             absGain: absGain.toFixed(2),
             xirr: xirr.toFixed(2)
         };
