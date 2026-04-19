@@ -26,45 +26,43 @@ export function renderAssetCard(item, index) {
         </div>`;
 }
 
-/* components.js */
-
 export function renderDrilldown(title, platforms) {
     if (!platforms || platforms.length === 0) return `<div class="p-10 text-center font-black">No Data</div>`;
 
     const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
     const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
     
-    // Check if the first platform is INR to set the header labels
     const firstItem = platforms[0];
-    const symbol = firstItem.currencySymbol || "₹"; // Default to ₹ if INR
+    const symbol = firstItem.currencySymbol || "₹";
     const label = symbol === "₹" ? "INR" : "SGD";
 
     return `
         <div class="flex justify-between items-center mb-6">
-            <h2 class="text-2xl font-black italic uppercase italic nami-header">${title}</h2>
-            <button onclick="ui.closeDrawer()" class="bg-black text-white px-6 py-2 rounded-full text-xs font-black uppercase shadow-[4px_4px_0px_#FF00FF] active:translate-y-1 active:shadow-none transition-all">Back</button>
+            <h2 class="text-xl md:text-2xl font-black italic uppercase italic nami-header">${title}</h2>
+            <button onclick="ui.closeDrawer()" class="bg-black text-white px-5 py-2 rounded-full text-[10px] font-black uppercase shadow-[4px_4px_0px_#FF00FF] active:translate-y-1 active:shadow-none transition-all">Back</button>
         </div>
 
-        <div class="grid grid-cols-2 gap-4 mb-8">
-            <div class="p-4 bg-white border-4 border-black shadow-[6px_6px_0px_#000]">
-                <p class="text-[9px] font-black uppercase opacity-40">Total Invested (${label})</p>
-                <p class="text-2xl font-black stat-val">${symbol}${Math.round(totalInv).toLocaleString()}</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mb-6">
+            <div class="p-3 md:p-4 bg-white border-4 border-black shadow-[4px_4px_0px_#000]">
+                <p class="text-[8px] md:text-[9px] font-black uppercase opacity-40">Total Invested (${label})</p>
+                <p class="text-xl md:text-2xl font-black stat-val">${symbol}${Math.round(totalInv).toLocaleString()}</p>
             </div>
-            <div class="p-4 bg-[#FFD700] border-4 border-black shadow-[6px_6px_0px_#000]">
-                <p class="text-[9px] font-black uppercase">Current Value (${label})</p>
-                <p class="text-2xl font-black stat-val">${symbol}${Math.round(totalVal).toLocaleString()}</p>
+            <div class="p-3 md:p-4 bg-[#FFD700] border-4 border-black shadow-[4px_4px_0px_#000]">
+                <p class="text-[8px] md:text-[9px] font-black uppercase">Current Value (${label})</p>
+                <p class="text-xl md:text-2xl font-black stat-val">${symbol}${Math.round(totalVal).toLocaleString()}</p>
             </div>
         </div>
 
-        <div class="space-y-4">
+        <div class="space-y-4 pb-10">
             ${platforms.map(p => {
                 const cleanName = p.name.trim();
                 const logoUrl = `logo/logo_${cleanName}.png`; 
                 
                 return `
-                <div class="p-4 flex justify-between items-center bg-white border-4 border-black shadow-[6px_6px_0px_#000]">
-                    <div class="flex items-center gap-5">
-                        <div class="w-14 h-14 bg-white border-2 border-black flex items-center justify-center p-1 shadow-[2px_2px_0px_#000] rounded-lg">
+                <div class="p-4 flex flex-col md:flex-row md:justify-between md:items-center bg-white border-4 border-black shadow-[6px_6px_0px_#000] gap-4">
+                    
+                    <div class="flex items-center gap-4">
+                        <div class="w-14 h-14 bg-white border-2 border-black flex-shrink-0 flex items-center justify-center p-1 shadow-[2px_2px_0px_#000] rounded-lg">
                             <img src="${logoUrl}" 
                                  onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
                                  class="w-full h-full object-contain" 
@@ -73,18 +71,19 @@ export function renderDrilldown(title, platforms) {
                         </div>
                         
                         <div>
-                            <p class="font-black text-sm uppercase tracking-tight mb-2">${cleanName}</p>
-                            <div class="flex gap-2">
-                                <span class="text-[10px] font-black bg-[#39FF14] px-2 py-0.5 border-2 border-black">ABS: ${p.absGain}%</span>
-                                <span class="text-[10px] font-black bg-[#00FFFF] px-2 py-0.5 border-2 border-black">XIRR: ${p.xirr}%</span>
+                            <p class="font-black text-sm md:text-base uppercase tracking-tight">${cleanName}</p>
+                            <div class="flex flex-wrap gap-2 mt-1">
+                                <span class="text-[9px] md:text-[10px] font-black bg-[#39FF14] px-2 py-0.5 border-2 border-black">ABS: ${p.absGain}%</span>
+                                <span class="text-[9px] md:text-[10px] font-black bg-[#00FFFF] px-2 py-0.5 border-2 border-black">XIRR: ${p.xirr}%</span>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="text-right">
-                        <p class="text-[9px] font-black opacity-30 uppercase mb-1">Valuation</p>
-                        <p class="font-black stat-val text-2xl">${p.currencySymbol}${Math.round(p.value).toLocaleString()}</p>
+                    <div class="flex flex-col md:items-end border-t-2 border-black border-dashed pt-3 md:pt-0 md:border-none">
+                        <p class="text-[8px] md:text-[9px] font-black opacity-30 uppercase">Platform Valuation</p>
+                        <p class="font-black stat-val text-xl md:text-2xl">${p.currencySymbol}${Math.round(p.value).toLocaleString()}</p>
                     </div>
+
                 </div>
             `}).join('')}
         </div>`;
