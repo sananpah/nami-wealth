@@ -1,9 +1,16 @@
 /* main.js */
 
-import { SHEET_URL, findValue, cleanNum, EXCHANGE_RATES, CURRENCY_SYMBOLS, getCorrectCasing, getCurrencySymbol } from './utils.js?v=1.1.10';
-import { renderAssetCard, renderDrilldown } from './components.js?v=1.1.10';
+import { SHEET_URL, findValue, cleanNum, EXCHANGE_RATES, CURRENCY_SYMBOLS, getCorrectCasing, getCurrencySymbol } from './utils.js?v=1.2.0';
+import { renderAssetCard, renderDrilldown } from './components.js?v=1.2.0';
 
-window.vaultState = { gold: [] };
+window.vaultState = {};
+
+// A few sub-categories get a nicer flavour title in the drawer.
+// Anything not listed here just falls back to "<Sub-Category> Breakdown".
+const VAULT_TITLES = {
+    "digital gold": "Bullion Vault",
+    "bonds": "Bond Portfolio"
+};
 
 function getAssetGroup(data, subCategoryName) {
     const today = new Date();
@@ -32,13 +39,52 @@ function getAssetGroup(data, subCategoryName) {
 
         return {
             name: platformName,
+            currencyCode: currencyAttr,
             currencySymbol: symbol, 
             invested: displayInv,
             value: displayVal,
+            // Base (SGD) figures too, so a drawer can total correctly even if a
+            // sub-category ends up spanning more than one currency.
+            baseInvested: rawInv,
+            baseValue: rawVal,
             absGain: absGain.toFixed(2),
             xirr: xirr.toFixed(2)
         };
     });
+}
+
+// Build { normalizedSubCategory: [platformRows] } from the "others" sheet —
+// covering EVERY Sub-Category found there, not just Digital Gold/Bonds.
+// This is the exact grouping logic the Digital Gold card already used
+// (getAssetGroup); we just run it once per distinct Sub-Category instead of
+// calling it by hand for two hardcoded names.
+function buildVaultState(othersData) {
+    const vault = {};
+    const seenKeys = new Set();
+
+    othersData.forEach(item => {
+        const rawSub = String(findValue(item, "Sub-Category") || "").trim();
+        if (!rawSub) return;
+        const key = rawSub.toLowerCase();
+        if (seenKeys.has(key)) return;
+        seenKeys.add(key);
+        vault[key] = getAssetGroup(othersData, rawSub);
+    });
+
+    return vault;
+}
+
+// Resolve a dashboard card's Sub-Category to a vault entry, allowing for the
+// "others" tab phrasing to differ slightly from the "dashboard" tab
+// (e.g. dashboard says "Digital Gold", others says "Digital Gold - SGB").
+function resolveVaultGroup(sub) {
+    const subLower = String(sub || "").toLowerCase().trim();
+    if (window.vaultState[subLower]) return window.vaultState[subLower];
+
+    const fuzzyKey = Object.keys(window.vaultState).find(
+        k => k.includes(subLower) || subLower.includes(k)
+    );
+    return fuzzyKey ? window.vaultState[fuzzyKey] : null;
 }
 
 async function fetchNamiData() {
@@ -51,10 +97,9 @@ async function fetchNamiData() {
         const snapshotData = fullData.snapshot || [];
         const othersData = fullData.others || [];
         
-        // 1. Populate the Vault
-        window.vaultState.gold = getAssetGroup(othersData, "Digital Gold");
-        window.vaultState.bonds = getAssetGroup(othersData, "Bonds");
-        
+        // 1. Populate the Vault — every Sub-Category present in "others", generically.
+        window.vaultState = buildVaultState(othersData);
+
         // 2. Calculate Live Totals (With Fallback for Headers)
         let currentTotal = 0;
         let categorySums = {};
@@ -100,19 +145,18 @@ window.ui = {
     openDrilldown: (sub) => {
         const drawer = document.getElementById('detail-drawer');
         const content = document.getElementById('drawer-content');
-        
-        // Normalize the name to check against our fixed data
-        const subLower = String(sub || "").toLowerCase().trim();
-        
-        if (subLower === "digital gold") {
-            // Show the actual vault data
-            content.innerHTML = renderDrilldown("Bullion Vault", window.vaultState.gold);
-        }    
-        else if (subLower === "bonds") {
-            // We reuse the same renderDrilldown function
-            content.innerHTML = renderDrilldown("Bond Portfolio", window.vaultState.bonds);
+
+        // Look this card's Sub-Category up in the vault. Every Sub-Category
+        // found in the "others" sheet gets a real breakdown here — this is
+        // no longer limited to Digital Gold/Bonds.
+        const group = resolveVaultGroup(sub);
+
+        if (group && group.length > 0) {
+            const subLower = String(sub || "").toLowerCase().trim();
+            const title = VAULT_TITLES[subLower] || `${sub} Breakdown`;
+            content.innerHTML = renderDrilldown(title, group);
         } else {
-            // Show "Coming Soon" for everything else (Equity, etc.)
+            // Show "Coming Soon" for anything with no matching rows in "others" yet.
             content.innerHTML = `
                 <div class="flex flex-col items-center justify-center py-16 text-center">
                     <div class="text-6xl mb-4 animate-bounce">🚀</div>

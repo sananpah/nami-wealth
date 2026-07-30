@@ -1,6 +1,6 @@
 /* components.js */
 
-import { emojiMap, findValue, cleanNum, getCorrectCasing } from './utils.js?v=1.1.7';
+import { emojiMap, findValue, cleanNum, getCorrectCasing } from './utils.js?v=1.2.0';
 
 export function renderAssetCard(item, index) {
     // 1. Get raw values and fix casing immediately
@@ -40,18 +40,31 @@ return `
 export function renderDrilldown(title, platforms) {
     if (!platforms || platforms.length === 0) return `<div class="p-10 text-center font-black">No Data</div>`;
 
-    const totalInv = platforms.reduce((acc, p) => acc + p.invested, 0);
-    const totalVal = platforms.reduce((acc, p) => acc + p.value, 0);
-    
+    // Most sub-categories only ever hold one currency (this is what Digital
+    // Gold/Bonds always assumed). Now that every card can drill down, a
+    // sub-category could span more than one — if so, total in base (SGD)
+    // instead of silently adding mismatched currencies together.
+    const currencies = new Set(platforms.map(p => p.currencyCode || "SGD"));
+    const mixed = currencies.size > 1;
+
+    const totalInv = mixed
+        ? platforms.reduce((acc, p) => acc + p.baseInvested, 0)
+        : platforms.reduce((acc, p) => acc + p.invested, 0);
+    const totalVal = mixed
+        ? platforms.reduce((acc, p) => acc + p.baseValue, 0)
+        : platforms.reduce((acc, p) => acc + p.value, 0);
+
     const firstItem = platforms[0];
-    const symbol = firstItem.currencySymbol || "₹";
-    const label = symbol === "₹" ? "INR" : "SGD";
+    const symbol = mixed ? "$" : (firstItem.currencySymbol || "₹");
+    const label = mixed ? "SGD" : (firstItem.currencyCode || "SGD");
 
     return `
         <div class="flex justify-between items-center mb-6">
             <h2 class="text-lg md:text-2xl font-black italic uppercase italic nami-header">${title}</h2>
             <button onclick="ui.closeDrawer()" class="bg-black text-white px-4 py-2 rounded-full text-[10px] font-black uppercase shadow-[3px_3px_0px_#FF00FF]">Back</button>
         </div>
+
+        ${mixed ? `<p class="text-[9px] font-black uppercase opacity-40 -mt-4 mb-4">Multiple currencies — totals shown in SGD</p>` : ''}
 
         <div class="grid grid-cols-2 gap-2 md:gap-4 mb-6">
             <div class="p-2 md:p-4 bg-white border-2 md:border-4 border-black shadow-[3px_3px_0px_#000]">
