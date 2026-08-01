@@ -25,9 +25,9 @@ export const emojiMap = {
 };
 
 export const EXCHANGE_RATES = {
-    "INR": 72.88,
+    "INR": 74.43,
     "EUR": 0.68,
-    "AED": 2.76,
+    "AED": 2.86,
     "SGD": 1.00
 };
 
