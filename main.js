@@ -1,7 +1,15 @@
 /* main.js */
 
-import { SHEET_URL, findValue, cleanNum, EXCHANGE_RATES, CURRENCY_SYMBOLS, getCorrectCasing, getCurrencySymbol } from './utils.js?v=1.2.1';
-import { renderAssetCard, renderDrilldown } from './components.js?v=1.2.1';
+// Read the ?v= this file was loaded with (set once, in index.html) and reuse
+// it for every internal import below — this is what keeps utils.js and
+// components.js from ever drifting out of sync with the rest of the build.
+const V = new URL(import.meta.url).searchParams.get('v') || '0.0.0';
+
+const { SHEET_URL, findValue, cleanNum, EXCHANGE_RATES, CURRENCY_SYMBOLS, getCorrectCasing, getCurrencySymbol, BUILD_VERSION } =
+    await import(`./utils.js?v=${V}`);
+const { renderAssetCard, renderDrilldown } = await import(`./components.js?v=${V}`);
+
+console.log(`main.js loaded — utils.js/components.js resolved at build v${BUILD_VERSION}`);
 
 window.vaultState = {};
 

@@ -1,6 +1,7 @@
 /* components.js */
 
-import { emojiMap, findValue, cleanNum, getCorrectCasing } from './utils.js?v=1.2.1';
+const V = new URL(import.meta.url).searchParams.get('v') || '0.0.0';
+const { emojiMap, findValue, cleanNum, getCorrectCasing } = await import(`./utils.js?v=${V}`);
 
 export function renderAssetCard(item, index) {
     // 1. Get raw values and fix casing immediately
