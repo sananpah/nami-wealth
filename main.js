@@ -1,7 +1,7 @@
 /* main.js */
 
-import { SHEET_URL, findValue, cleanNum, EXCHANGE_RATES, CURRENCY_SYMBOLS, getCorrectCasing, getCurrencySymbol } from './utils.js?v=1.2.0';
-import { renderAssetCard, renderDrilldown } from './components.js?v=1.2.0';
+import { SHEET_URL, findValue, cleanNum, EXCHANGE_RATES, CURRENCY_SYMBOLS, getCorrectCasing, getCurrencySymbol } from './utils.js?v=1.2.1';
+import { renderAssetCard, renderDrilldown } from './components.js?v=1.2.1';
 
 window.vaultState = {};
 
