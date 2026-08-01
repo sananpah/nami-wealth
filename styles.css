@@ -1,19 +1,18 @@
 /* styles.css */
 
-/* Fonts are self-hosted (fonts/*.woff2) AND de-hinted.
-   Root cause of the clipped "1": these files came from Google Fonts'
-   auto-hinting pipeline (ttfautohint), which can misbehave on thin
-   diagonal strokes at small pixel sizes — exactly the numeral "1"'s flag
-   in this geometric/blocky typeface. Windows' DirectWrite (used by
-   Chrome/Edge/Brave there) interprets those embedded hint instructions
-   more aggressively than e.g. FreeType, which is why this only showed up
-   in-browser and not in a plain font-file render. The glyph outlines
-   themselves were always correct — verified with fontTools — so hinting
-   was the only remaining variable. Stripped the fpgm/prep/cvt tables
-   entirely; modern displays don't need manual hinting to render cleanly. */
+/* Numbers use JetBrains Mono instead of Space Mono. Space Mono's bold "1"
+   was clipping at the top in every Chromium browser (Chrome/Edge/Brave)
+   despite the glyph outline, hinting, font-loading, and CSS box model all
+   checking out correctly on inspection — pointing at something specific
+   to how DirectWrite (Windows) rasterizes that one glyph in that one font,
+   which isn't reproducible or debuggable outside a live Windows browser.
+   JetBrains Mono is one of the most widely-used and battle-tested
+   monospace fonts for exactly this kind of dense numeric display, so it
+   sidesteps the issue entirely rather than chasing it further. Also
+   de-hinted for the same reason as before — modern displays don't need it. */
 @font-face {
-    font-family: 'Space Mono';
-    src: url('fonts/space-mono-700.woff2') format('woff2');
+    font-family: 'JetBrains Mono';
+    src: url('fonts/jetbrains-mono-700.woff2') format('woff2');
     font-weight: 700;
     font-style: normal;
     font-display: swap;
@@ -74,7 +73,7 @@ body {
 }
 
 .stat-val { 
-    font-family: 'Space Mono', monospace; 
+    font-family: 'JetBrains Mono', monospace; 
     font-weight: 700 !important; 
     line-height: 1.8 !important; 
     font-variant-numeric: lining-nums tabular-nums;
