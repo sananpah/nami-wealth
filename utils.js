@@ -1,15 +1,14 @@
 /* utils.js */
 export const SHEET_URL = "https://script.google.com/macros/s/AKfycby4pyDQgIfmnNXP-wNFH3CCA_xaekozyNVbtH4MeLrNG8rZgO4NrLYa2q6oDmDlCaRPwQ/exec";
-export const BUILD_VERSION = "v1.2.0"; // Generic drilldown for all dashboard cards
+export const BUILD_VERSION = "v1.2.1"; // Generic drilldown for all dashboard cards
 
 export const emojiMap = {
     "Digital Gold": "🌟", 
     "Gold": "🪙",
     "Property(Fractional + Debt)": "🏢",
     "Fractional Property": "🏠",
-    "Invoice Discounting + Asset Leasing": "📄💸",
+    "Invoice Discounting": "📄💸",
     "P2P Lending": "🤝💰",
-    "Invoice Discounting": "🧾",
     "Stocks + Mutual Funds": "📈",
     "ETF": "🧺",
     "Unit Trust": "🏦📊",
@@ -26,9 +25,9 @@ export const emojiMap = {
 };
 
 export const EXCHANGE_RATES = {
-    "INR": 72.88,
-    "EUR": 0.68,
-    "AED": 2.76,
+    "INR": 74.125,
+    "EUR": 0.676,
+    "AED": 2.864,
     "SGD": 1.00
 };
 
