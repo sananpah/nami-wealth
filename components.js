@@ -1,6 +1,6 @@
 /* components.js */
 
-import { emojiMap, findValue, cleanNum, getCorrectCasing } from './utils.js?v=1.2.0';
+import { emojiMap, findValue, cleanNum, getCorrectCasing } from './utils.js?v=1.2.1';
 
 export function renderAssetCard(item, index) {
     // 1. Get raw values and fix casing immediately
