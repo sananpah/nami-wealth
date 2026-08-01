@@ -1,10 +1,16 @@
 /* styles.css */
 
-/* Fonts are self-hosted (fonts/*.woff2) instead of pulled from Google Fonts'
-   CDN at runtime. If that external call is ever slow, blocked, or fails,
-   the browser silently falls back to the OS's generic monospace font — and
-   generic fallback monospace fonts commonly render the digit "1" as a
-   plain flag-less bar, which is exactly the "truncated 1" symptom. */
+/* Fonts are self-hosted (fonts/*.woff2) AND de-hinted.
+   Root cause of the clipped "1": these files came from Google Fonts'
+   auto-hinting pipeline (ttfautohint), which can misbehave on thin
+   diagonal strokes at small pixel sizes — exactly the numeral "1"'s flag
+   in this geometric/blocky typeface. Windows' DirectWrite (used by
+   Chrome/Edge/Brave there) interprets those embedded hint instructions
+   more aggressively than e.g. FreeType, which is why this only showed up
+   in-browser and not in a plain font-file render. The glyph outlines
+   themselves were always correct — verified with fontTools — so hinting
+   was the only remaining variable. Stripped the fpgm/prep/cvt tables
+   entirely; modern displays don't need manual hinting to render cleanly. */
 @font-face {
     font-family: 'Space Mono';
     src: url('fonts/space-mono-700.woff2') format('woff2');
@@ -42,6 +48,8 @@ body {
     min-height: 100vh;
     margin: 0;
     overflow-x: hidden; 
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
 }
 
 .networth-container {
