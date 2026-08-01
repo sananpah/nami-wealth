@@ -1,5 +1,38 @@
 /* styles.css */
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;700;900&family=Space+Mono:wght@700&display=swap');
+
+/* Fonts are self-hosted (fonts/*.woff2) instead of pulled from Google Fonts'
+   CDN at runtime. If that external call is ever slow, blocked, or fails,
+   the browser silently falls back to the OS's generic monospace font — and
+   generic fallback monospace fonts commonly render the digit "1" as a
+   plain flag-less bar, which is exactly the "truncated 1" symptom. */
+@font-face {
+    font-family: 'Space Mono';
+    src: url('fonts/space-mono-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Outfit';
+    src: url('fonts/outfit-400.woff2') format('woff2');
+    font-weight: 400;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Outfit';
+    src: url('fonts/outfit-700.woff2') format('woff2');
+    font-weight: 700;
+    font-style: normal;
+    font-display: swap;
+}
+@font-face {
+    font-family: 'Outfit';
+    src: url('fonts/outfit-900.woff2') format('woff2');
+    font-weight: 900;
+    font-style: normal;
+    font-display: swap;
+}
 
 body { 
     background: linear-gradient(125deg, #FF00E6 0%, #FFB800 25%, #00FFF0 50%, #4DFF00 75%, #FF004D 100%);
@@ -36,6 +69,7 @@ body {
     font-family: 'Space Mono', monospace; 
     font-weight: 700 !important; 
     line-height: 1.8 !important; 
+    font-variant-numeric: lining-nums tabular-nums;
     display: inline-block;
     padding-top: 15px !important; 
     padding-bottom: 5px;
