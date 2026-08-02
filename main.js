@@ -109,7 +109,12 @@ async function fetchNamiData() {
         
         const dashboardData = fullData.dashboard || [];
         const snapshotData = fullData.snapshot || [];
-        const othersData = fullData.others || [];
+        // "others" and "equity" are two separate sheet tabs holding the same
+        // shape of row (Platform / Sub-Category / Currency / Investments /
+        // Portfolio Valuation) — merge them into one list so every card's
+        // drilldown draws from both tabs transparently. Add more tabs here
+        // the same way if you split things out further later.
+        const othersData = [...(fullData.others || []), ...(fullData.equity || [])];
         
         // 1. Populate the Vault — every Sub-Category present in "others", generically.
         window.vaultState = buildVaultState(othersData);
