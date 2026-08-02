@@ -97,7 +97,7 @@ export function renderDrilldown(title, platforms) {
                             <img src="${primarySrc}" 
                                  ${fallbackAttr}
                                  onerror="window.handleLogoError(this)" 
-                                 class="w-full h-full object-cover" 
+                                 class="w-full h-full object-contain" 
                                  alt="${cleanName}">
                             <span class="hidden font-black text-[8px] text-center leading-none">${cleanName}</span>
                         </div>
