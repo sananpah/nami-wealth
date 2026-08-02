@@ -93,11 +93,11 @@ export function renderDrilldown(title, platforms) {
                 <div class="p-3 md:p-4 flex flex-wrap md:flex-nowrap justify-between items-center bg-white border-2 md:border-4 border-black shadow-[4px_4px_0px_#000] gap-2">
                     
                     <div class="flex items-center gap-3 min-w-0">
-                        <div class="w-10 h-10 md:w-14 md:h-14 bg-white border-2 border-black flex-shrink-0 flex items-center justify-center p-1">
+                        <div class="w-12 h-12 md:w-16 md:h-16 bg-white border-2 border-black rounded-xl overflow-hidden flex-shrink-0 flex items-center justify-center">
                             <img src="${primarySrc}" 
                                  ${fallbackAttr}
                                  onerror="window.handleLogoError(this)" 
-                                 class="w-full h-full object-contain" 
+                                 class="w-full h-full object-cover" 
                                  alt="${cleanName}">
                             <span class="hidden font-black text-[8px] text-center leading-none">${cleanName}</span>
                         </div>
