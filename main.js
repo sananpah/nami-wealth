@@ -32,6 +32,11 @@ function getAssetGroup(data, subCategoryName) {
         const platformName = String(findValue(item, "Platform") || "Unknown");
         const currencyAttr = String(findValue(item, "Currency") || "SGD").toUpperCase();
 
+        // Optional "Logo URL" column in the sheet — paste a direct image link
+        // from the platform's own website and it's used automatically, no
+        // local file needed. Falls back to logo/logo_<Platform>.png if blank.
+        const logoUrl = String(findValue(item, "Logo URL") || findValue(item, "Logo") || "").trim();
+
         const rate = EXCHANGE_RATES[currencyAttr] || 1.0;
         const symbol = getCurrencySymbol(currencyAttr);
 
@@ -47,6 +52,7 @@ function getAssetGroup(data, subCategoryName) {
 
         return {
             name: platformName,
+            logoUrl: logoUrl,
             currencyCode: currencyAttr,
             currencySymbol: symbol, 
             invested: displayInv,
@@ -185,6 +191,20 @@ window.ui = {
     closeDrawer: () => {
         document.getElementById('detail-drawer').classList.add('opacity-0', 'pointer-events-none');
         document.getElementById('drawer-content').style.transform = "translateY(100%)";
+    }
+};
+
+// Logo fallback chain for platform rows in the drilldown drawer:
+// 1) the "Logo URL" the sheet provided (if any) → 2) a local logo/*.png file
+// (backward-compatible with existing platforms) → 3) the text-initial badge.
+// Referenced from the <img onerror="..."> in components.js's renderDrilldown.
+window.handleLogoError = (img) => {
+    if (img.dataset.fallback && img.dataset.triedFallback !== '1') {
+        img.dataset.triedFallback = '1';
+        img.src = img.dataset.fallback;
+    } else {
+        img.style.display = 'none';
+        if (img.nextElementSibling) img.nextElementSibling.style.display = 'block';
     }
 };
 

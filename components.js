@@ -81,15 +81,22 @@ export function renderDrilldown(title, platforms) {
         <div class="space-y-3 pb-10">
             ${platforms.map(p => {
                 const cleanName = p.name.trim();
-                const logoUrl = `logo/logo_${cleanName}.png`; 
-                
+                const localLogo = `logo/logo_${cleanName}.png`;
+                // If the sheet gave us a Logo URL, try that first and fall back
+                // to the local file (then to initials) if it fails to load.
+                // If the sheet didn't give one, go straight to the local file
+                // — same behaviour as before for platforms you haven't updated.
+                const primarySrc = p.logoUrl || localLogo;
+                const fallbackAttr = p.logoUrl ? `data-fallback="${localLogo}"` : '';
+
                 return `
                 <div class="p-3 md:p-4 flex flex-wrap md:flex-nowrap justify-between items-center bg-white border-2 md:border-4 border-black shadow-[4px_4px_0px_#000] gap-2">
                     
                     <div class="flex items-center gap-3 min-w-0">
                         <div class="w-10 h-10 md:w-14 md:h-14 bg-white border-2 border-black flex-shrink-0 flex items-center justify-center p-1">
-                            <img src="${logoUrl}" 
-                                 onerror="this.style.display='none'; this.nextElementSibling.style.display='block';" 
+                            <img src="${primarySrc}" 
+                                 ${fallbackAttr}
+                                 onerror="window.handleLogoError(this)" 
                                  class="w-full h-full object-contain" 
                                  alt="${cleanName}">
                             <span class="hidden font-black text-[8px] text-center leading-none">${cleanName}</span>
