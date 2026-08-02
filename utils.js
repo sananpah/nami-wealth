@@ -5,7 +5,8 @@ export const BUILD_VERSION = new URL(import.meta.url).searchParams.get('v') || '
 export const emojiMap = {
     "Digital Gold": "🌟", 
     "Gold": "🪙",
-    "Property(Fractional + Debt)": "🏢",
+    "Property : Fractional": "🏠🧩",
+    "Property : Real Estate Debt": "🏠💳",
     "Fractional Property": "🏠",
     "Invoice Discounting": "📄💸",
     "P2P Lending": "🤝💰",
